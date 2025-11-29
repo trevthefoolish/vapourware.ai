@@ -39,7 +39,7 @@ An interactive meditation on Ecclesiastes 1:1–3, presenting the Hebrew text al
 | Hebrew title (קֹהֶלֶת) | 400 | `clamp(50px, 12vw, 78px)` | Largest element |
 | Hebrew words | 400 | `clamp(30px, 7.5vw, 40px)` | Generous for legibility |
 | English title | 300 | `clamp(24px, 5vw, 34px)` | Light weight, smaller than Hebrew |
-| English words | 300 | `clamp(20px, 5vw, 26px)` | Italic, supportive role |
+| English words | 400 | `clamp(20px, 5vw, 26px)` | Italic, supportive role |
 
 **Spacing:**
 - Hebrew line-height: `1.6`
@@ -135,7 +135,7 @@ CSS and JavaScript are organized by component with clear section markers:
 
 **Naming conventions:**
 - CSS classes: `word-he`, `word-en`, `verse`, `tooltip`
-- IDs for unique elements: `qohelet-floating`, `tooltip`, `nav-dots`
+- IDs for unique elements: `qohelet-floating`, `tooltip`
 - Data attributes for linking: `data-link="vanity"`
 
 ---
@@ -147,7 +147,7 @@ Mobile is not secondary. Half of all visitors will arrive on phones.
 - **Font sizes:** Minimum 20px for body text
 - **Safe areas:** Respect `env(safe-area-inset-bottom)` for notched devices
 - **Touch events:** Handle `touchstart`, `touchmove`, `touchend` explicitly
-- **Navigation hints:** Provide "swipe to explore" affordance on first visit
+- **Navigation hints:** Provide "tap any word" affordance on first visit
 - **Viewport:** Lock scale to prevent accidental zoom during interaction
 
 ---
