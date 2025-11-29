@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ecclesiastes 1:1-2</title>
+  <title>Ecclesiastes 1:1-3</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -192,6 +192,18 @@
       </div>
       <div class="verse-en" id="verse2En"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
     </div>
+
+    <div class="verse" id="verse3">
+      <div class="verse-he">
+        <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
+        <span class="word-he" data-link="man">לָאָדָם</span>
+        <span class="word-he" data-link="labor">בְּכָל־עֲמָלוֹ</span>
+        <span class="word-he" data-link="toils">שֶׁיַּעֲמֹל</span>
+        <span class="word-he" data-link="under">תַּחַת</span>
+        <span class="word-he" data-link="sun">הַשָּׁמֶשׁ</span>
+      </div>
+      <div class="verse-en" id="verse3En">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
+    </div>
   </div>
   
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
@@ -206,15 +218,18 @@
     const qohelet = $('qohelet');
     const verse1 = $('verse1');
     const verse2 = $('verse2');
+    const verse3 = $('verse3');
     const verse1En = $('verse1En');
     const verse2En = $('verse2En');
+    const verse3En = $('verse3En');
     const ph1 = $('ph1');
     const ph2 = $('ph2');
     const progress = $('progress');
     const verseNum = $('verseNum');
-    
+
     const v1Words = [...verse1.querySelectorAll('.word-he')];
     const v2Words = [...verse2.querySelectorAll('.word-he')];
+    const v3Words = [...verse3.querySelectorAll('.word-he')];
 
     // ===== HIGHLIGHTING =====
     function clearLit() {
@@ -238,7 +253,7 @@
     }
     
     function setupHitDetection() {
-      [verse1, verse2].forEach(c => {
+      [verse1, verse2, verse3].forEach(c => {
         c.addEventListener('mousemove', e => {
           const link = findWordAtPoint(e.clientX, e.clientY, c);
           if (link) lightUp(link);
@@ -329,8 +344,8 @@
     }
 
     // ===== STATE =====
-    const MAX = 4;
-    const ANCHORS = [0, 1, 2, 3, 4];
+    const MAX = 5;
+    const ANCHORS = [0, 1, 2, 3, 4, 5];
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -343,8 +358,10 @@
       qohelet.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
       verse1.style.cssText = 'position:absolute;opacity:1;transform:none';
       verse2.style.cssText = 'position:absolute;opacity:1;transform:none';
+      verse3.style.cssText = 'position:absolute;opacity:1;transform:none';
       v1Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
       v2Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+      v3Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
       
       void document.body.offsetHeight;
       
@@ -371,10 +388,13 @@
           q: { x: pos.cx, y: pos.cy + 70, scale: 1, opacity: 0 },
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
+          v3: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
+          v3Words: 0,
           v1En: 0,
           v2En: 0,
+          v3En: 0,
           verseNum: ''
         };
         case 1: return {
@@ -382,10 +402,13 @@
           q: { x: pos.cx, y: pos.cy + 40, scale: 1, opacity: 1 },
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
+          v3: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
+          v3Words: 0,
           v1En: 0,
           v2En: 0,
+          v3En: 0,
           verseNum: ''
         };
         case 2: return {
@@ -393,10 +416,13 @@
           q: { x: pos.cx, y: pos.cy, scale: 1, opacity: 1 },
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
+          v3: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
+          v3Words: 0,
           v1En: 0,
           v2En: 0,
+          v3En: 0,
           verseNum: ''
         };
         case 3: return {
@@ -404,10 +430,13 @@
           q: { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 },
           v1: { opacity: 1, y: 0 },
           v2: { opacity: 0, y: 25 },
+          v3: { opacity: 0, y: 25 },
           v1Words: 1, // All visible
           v2Words: 0,
+          v3Words: 0,
           v1En: 1,
           v2En: 0,
+          v3En: 0,
           verseNum: '1:1'
         };
         case 4: return {
@@ -415,11 +444,28 @@
           q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 },
           v1: { opacity: 0, y: -15 },
           v2: { opacity: 1, y: 0 },
+          v3: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 1, // All visible
+          v3Words: 0,
           v1En: 0,
           v2En: 1,
+          v3En: 0,
           verseNum: '1:2'
+        };
+        case 5: return {
+          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
+          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 },
+          v1: { opacity: 0, y: -15 },
+          v2: { opacity: 0, y: -15 },
+          v3: { opacity: 1, y: 0 },
+          v1Words: 0,
+          v2Words: 0,
+          v3Words: 1, // All visible
+          v1En: 0,
+          v2En: 0,
+          v3En: 1,
+          verseNum: '1:3'
         };
       }
     }
@@ -451,10 +497,16 @@
           opacity: lerp(s1.v2.opacity, s2.v2.opacity, e),
           y: lerp(s1.v2.y, s2.v2.y, e)
         },
+        v3: {
+          opacity: lerp(s1.v3.opacity, s2.v3.opacity, e),
+          y: lerp(s1.v3.y, s2.v3.y, e)
+        },
         v1Words: lerp(s1.v1Words, s2.v1Words, e),
         v2Words: lerp(s1.v2Words, s2.v2Words, e),
+        v3Words: lerp(s1.v3Words, s2.v3Words, e),
         v1En: lerp(s1.v1En, s2.v1En, e),
         v2En: lerp(s1.v2En, s2.v2En, e),
+        v3En: lerp(s1.v3En, s2.v3En, e),
         verseNum: e > 0.5 ? s2.verseNum : s1.verseNum
       };
     }
@@ -540,10 +592,26 @@
         w.style.opacity = wordT;
         w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
       });
-      
+
       // V2 English
       verse2En.style.opacity = state.v2En;
-      
+
+      // Verse 3
+      verse3.style.opacity = state.v3.opacity;
+      verse3.style.transform = `translateY(${state.v3.y}px)`;
+      verse3.style.pointerEvents = state.v3.opacity > 0.2 ? 'auto' : 'none';
+
+      // V3 words
+      v3Words.forEach((w, i) => {
+        const progress = state.v3Words * (v3Words.length + 1);
+        const wordT = Math.max(0, Math.min(1, progress - i));
+        w.style.opacity = wordT;
+        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+      });
+
+      // V3 English
+      verse3En.style.opacity = state.v3En;
+
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
       
@@ -643,6 +711,7 @@
       qohelet.style.opacity = s.q.opacity;
       verse1.style.opacity = s.v1.opacity;
       verse2.style.opacity = s.v2.opacity;
+      verse3.style.opacity = s.v3.opacity;
       
       requestAnimationFrame(render);
     }
