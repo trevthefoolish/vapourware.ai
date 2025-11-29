@@ -74,6 +74,23 @@
     .title-he.lit {
       color: var(--gold-lit);
       text-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
+      animation: glowPulseTitle 2s ease-in-out infinite;
+    }
+
+    .title-he.touch-active {
+      transform: translate(-50%, -50%) scale(0.97);
+      transition: transform 0.1s ease-out;
+    }
+
+    @keyframes glowPulseTitle {
+      0%, 100% {
+        text-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
+        filter: brightness(1);
+      }
+      50% {
+        text-shadow: 0 0 40px rgba(218, 165, 32, 0.85), 0 0 70px rgba(218, 165, 32, 0.35);
+        filter: brightness(1.12);
+      }
     }
 
     /* ===== VERSES ===== */
@@ -128,6 +145,47 @@
     .word-he.lit {
       color: var(--gold-lit);
       text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    .word-he.lit-stagger {
+      color: var(--gold-lit);
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+      animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 glowPulse 2s ease-in-out 0.4s infinite;
+    }
+
+    .word-he.touch-active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease-out;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+        filter: brightness(1);
+      }
+      50% {
+        text-shadow: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+        filter: brightness(1.1);
+      }
+    }
+
+    @keyframes wordReveal {
+      0% {
+        opacity: 0.5;
+        transform: scale(0.92);
+        text-shadow: 0 0 0 rgba(218, 165, 32, 0);
+      }
+      60% {
+        transform: scale(1.05);
+        text-shadow: 0 0 35px rgba(218, 165, 32, 0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+      }
     }
 
     /* ===== ENGLISH WORDS ===== */
@@ -146,6 +204,47 @@
     .word-en.lit {
       color: var(--cream);
       text-shadow: 0 0 12px rgba(232, 228, 220, 0.5);
+      animation: glowPulseEn 2s ease-in-out infinite;
+    }
+
+    .word-en.lit-stagger {
+      color: var(--cream);
+      text-shadow: 0 0 12px rgba(232, 228, 220, 0.5);
+      animation: wordRevealEn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 glowPulseEn 2s ease-in-out 0.4s infinite;
+    }
+
+    .word-en.touch-active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease-out;
+    }
+
+    @keyframes glowPulseEn {
+      0%, 100% {
+        text-shadow: 0 0 12px rgba(232, 228, 220, 0.5);
+        filter: brightness(1);
+      }
+      50% {
+        text-shadow: 0 0 18px rgba(232, 228, 220, 0.7), 0 0 40px rgba(232, 228, 220, 0.2);
+        filter: brightness(1.08);
+      }
+    }
+
+    @keyframes wordRevealEn {
+      0% {
+        opacity: 0.4;
+        transform: scale(0.94);
+        text-shadow: 0 0 0 rgba(232, 228, 220, 0);
+      }
+      60% {
+        transform: scale(1.04);
+        text-shadow: 0 0 20px rgba(232, 228, 220, 0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: 0 0 12px rgba(232, 228, 220, 0.5);
+      }
     }
 
     /* ===== PLACEHOLDER ===== */
@@ -182,27 +281,141 @@
       z-index: 200;
       background: linear-gradient(145deg, rgba(20, 18, 15, 0.97), rgba(12, 10, 8, 0.98));
       border: 1px solid rgba(218, 165, 32, 0.3);
-      border-radius: 8px;
-      padding: 14px 18px;
+      border-radius: 10px;
+      padding: 16px 20px;
       max-width: min(320px, 85vw);
       box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(218, 165, 32, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(218, 165, 32, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(8px);
-      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+      transform: translateY(12px) scale(0.92);
+      transform-origin: top center;
       pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
+      /* No CSS transition - controlled by JavaScript spring */
+      will-change: transform, opacity;
     }
 
     .word-tooltip.visible {
-      opacity: 1;
       visibility: visible;
-      transform: translateY(0);
       pointer-events: auto;
+      animation: tooltipSpringIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .word-tooltip.hiding {
+      animation: tooltipSpringOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .word-tooltip.above {
+      transform-origin: bottom center;
+    }
+
+    @keyframes tooltipSpringIn {
+      0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.02);
+      }
+      75% {
+        transform: translateY(1px) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOut {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.95);
+      }
+    }
+
+    /* Above tooltip animations (inverted direction) */
+    .word-tooltip.above.visible {
+      animation: tooltipSpringInAbove 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .word-tooltip.above.hiding {
+      animation: tooltipSpringOutAbove 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes tooltipSpringInAbove {
+      0% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 12px)) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(calc(-100% - 3px)) scale(1.02);
+      }
+      75% {
+        transform: translateY(calc(-100% + 1px)) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOutAbove {
+      0% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 8px)) scale(0.95);
+      }
+    }
+
+    /* Tooltip border shimmer effect */
+    .word-tooltip::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 11px;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba(218, 165, 32, 0.4) 0%,
+        rgba(218, 165, 32, 0.1) 40%,
+        rgba(218, 165, 32, 0.1) 60%,
+        rgba(218, 165, 32, 0.4) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      animation: borderShimmer 3s ease-in-out infinite;
+    }
+
+    .word-tooltip.visible::before {
+      opacity: 1;
+    }
+
+    @keyframes borderShimmer {
+      0%, 100% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+      }
+      50% {
+        background-position: 100% 100%;
+        opacity: 1;
+      }
     }
 
     .word-tooltip-hebrew {
@@ -212,6 +425,12 @@
       text-align: center;
       margin-bottom: 6px;
       font-weight: 400;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .word-tooltip.visible .word-tooltip-hebrew {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
     }
 
     .word-tooltip-transliteration {
@@ -222,7 +441,14 @@
       letter-spacing: 0.05em;
       margin-bottom: 10px;
       padding-bottom: 10px;
-      border-bottom: 1px solid rgba(218, 165, 32, 0.15);
+      border-bottom: 1px solid rgba(218, 165, 32, 0);
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-transliteration {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s forwards,
+                 dividerFadeIn 0.5s ease 0.25s forwards;
     }
 
     .word-tooltip-tidbit {
@@ -231,6 +457,32 @@
       line-height: 1.6;
       text-align: left;
       font-weight: 300;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-tidbit {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+    }
+
+    @keyframes tooltipContentIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes dividerFadeIn {
+      0% {
+        border-bottom-color: rgba(218, 165, 32, 0);
+      }
+      100% {
+        border-bottom-color: rgba(218, 165, 32, 0.2);
+      }
     }
   </style>
 </head>
@@ -391,9 +643,17 @@
     let tooltipVisible = false;
     let activeWord = null;
 
+    let hideTooltipTimer = null;
+
     function showTooltip(wordEl, linkValue) {
       const data = wordData[linkValue];
       if (!data) return;
+
+      // Cancel any pending hide animation
+      if (hideTooltipTimer) {
+        clearTimeout(hideTooltipTimer);
+        hideTooltipTimer = null;
+      }
 
       activeWord = wordEl;
       tooltipHebrew.textContent = data.hebrew;
@@ -402,11 +662,11 @@
 
       // Position the tooltip
       const rect = wordEl.getBoundingClientRect();
-      const tooltipRect = wordTooltip.getBoundingClientRect();
 
       // Calculate position - prefer below the word, centered
       let left = rect.left + rect.width / 2 - 160; // 160 = half of max-width 320
-      let top = rect.bottom + 12;
+      let top = rect.bottom + 14;
+      let isAbove = false;
 
       // Adjust if too close to edges
       const padding = 12;
@@ -417,20 +677,46 @@
 
       // If below would go off screen, show above
       if (top + 150 > window.innerHeight) {
-        top = rect.top - 12;
-        wordTooltip.style.transform = 'translateY(-100%)';
-      } else {
-        wordTooltip.style.transform = 'translateY(0)';
+        top = rect.top - 14;
+        isAbove = true;
       }
 
+      // Remove animation classes before repositioning
+      wordTooltip.classList.remove('visible', 'hiding', 'above');
+
+      // Position first
       wordTooltip.style.left = left + 'px';
       wordTooltip.style.top = top + 'px';
+
+      // Add direction-aware class
+      if (isAbove) {
+        wordTooltip.classList.add('above');
+        wordTooltip.style.transform = 'translateY(-100%)';
+      } else {
+        wordTooltip.style.transform = '';
+      }
+
+      // Force reflow for animation restart
+      void wordTooltip.offsetHeight;
+
+      // Trigger spring-in animation
       wordTooltip.classList.add('visible');
       tooltipVisible = true;
     }
 
     function hideTooltip() {
+      if (!tooltipVisible) return;
+
+      // Add hiding animation
+      wordTooltip.classList.add('hiding');
       wordTooltip.classList.remove('visible');
+
+      // Remove after animation completes
+      hideTooltipTimer = setTimeout(() => {
+        wordTooltip.classList.remove('hiding', 'above');
+        hideTooltipTimer = null;
+      }, 250);
+
       tooltipVisible = false;
       activeWord = null;
     }
@@ -460,14 +746,60 @@
     }
 
     // ===== HIGHLIGHTING =====
+    let litElements = [];
+    let staggerTimers = [];
+
     function clearLit() {
-      document.querySelectorAll('.lit').forEach(el => el.classList.remove('lit'));
+      // Clear any pending stagger timers
+      staggerTimers.forEach(t => clearTimeout(t));
+      staggerTimers = [];
+
+      // Remove all lit classes
+      litElements.forEach(el => {
+        el.classList.remove('lit', 'lit-stagger');
+        el.style.animationDelay = '';
+      });
+      litElements = [];
     }
-    
-    function lightUp(linkValue) {
+
+    function lightUp(linkValue, stagger = false) {
       if (!linkValue) return;
       clearLit();
-      document.querySelectorAll(`[data-link="${linkValue}"]`).forEach(el => el.classList.add('lit'));
+
+      const elements = [...document.querySelectorAll(`[data-link="${linkValue}"]`)];
+      litElements = elements;
+
+      if (stagger && elements.length > 1) {
+        // Staggered reveal animation for connected words
+        elements.forEach((el, i) => {
+          const timer = setTimeout(() => {
+            el.style.animationDelay = `0s`;
+            el.classList.add('lit-stagger');
+          }, i * 60); // 60ms stagger between each word
+          staggerTimers.push(timer);
+        });
+      } else {
+        // Immediate lighting for single words or hover
+        elements.forEach(el => el.classList.add('lit'));
+      }
+    }
+
+    // ===== TOUCH FEEDBACK =====
+    let touchFeedbackEl = null;
+
+    function addTouchFeedback(el) {
+      if (touchFeedbackEl) {
+        touchFeedbackEl.classList.remove('touch-active');
+      }
+      touchFeedbackEl = el;
+      el.classList.add('touch-active');
+    }
+
+    function removeTouchFeedback() {
+      if (touchFeedbackEl) {
+        touchFeedbackEl.classList.remove('touch-active');
+        touchFeedbackEl = null;
+      }
     }
     
     function findWordAtPoint(x, y, container) {
@@ -484,17 +816,24 @@
       [verse1, verse2, verse3].forEach(c => {
         // Desktop hover highlighting
         c.addEventListener('mousemove', e => {
+          if (tooltipVisible) return; // Don't change highlights while tooltip is shown
           const link = findWordAtPoint(e.clientX, e.clientY, c);
-          if (link) lightUp(link);
+          if (link) lightUp(link, false); // No stagger for hover
         });
-        c.addEventListener('mouseleave', clearLit);
+        c.addEventListener('mouseleave', () => {
+          if (!tooltipVisible) clearLit();
+        });
 
         // Desktop click for tooltip
         c.addEventListener('click', e => {
           const result = findWordElementAtPoint(e.clientX, e.clientY, c);
           if (result) {
+            const wasVisible = tooltipVisible && activeWord === result.el;
             toggleTooltip(result.el, result.link, e);
-            lightUp(result.link);
+            // Stagger highlight animation when opening tooltip
+            if (!wasVisible) {
+              lightUp(result.link, true);
+            }
           }
         });
 
@@ -505,24 +844,49 @@
           if (result) {
             // Prevent the default which triggers text selection
             e.preventDefault();
-            lightUp(result.link);
+            // Add touch feedback
+            addTouchFeedback(result.el);
+            const wasVisible = tooltipVisible && activeWord === result.el;
+            // Stagger highlight animation when opening tooltip
+            if (!wasVisible) {
+              lightUp(result.link, true);
+            }
             toggleTooltip(result.el, result.link, e);
           }
         }, { passive: false }); // passive: false to allow preventDefault
+
+        c.addEventListener('touchend', () => {
+          removeTouchFeedback();
+        }, { passive: true });
       });
 
       // Qohelet (floating title) handling
-      qohelet.addEventListener('mouseenter', () => lightUp('teacher'));
-      qohelet.addEventListener('mouseleave', clearLit);
+      qohelet.addEventListener('mouseenter', () => {
+        if (!tooltipVisible) lightUp('teacher', false);
+      });
+      qohelet.addEventListener('mouseleave', () => {
+        if (!tooltipVisible) clearLit();
+      });
       qohelet.addEventListener('click', e => {
+        const wasVisible = tooltipVisible && activeWord === qohelet;
         toggleTooltip(qohelet, 'teacher', e);
-        lightUp('teacher');
+        if (!wasVisible) {
+          lightUp('teacher', true);
+        }
       });
       qohelet.addEventListener('touchstart', e => {
         e.preventDefault();
-        lightUp('teacher');
+        addTouchFeedback(qohelet);
+        const wasVisible = tooltipVisible && activeWord === qohelet;
+        if (!wasVisible) {
+          lightUp('teacher', true);
+        }
         toggleTooltip(qohelet, 'teacher', e);
       }, { passive: false });
+
+      qohelet.addEventListener('touchend', () => {
+        removeTouchFeedback();
+      }, { passive: true });
 
       // Hide tooltip and clear highlights when tapping outside
       document.addEventListener('touchstart', e => {
@@ -542,6 +906,7 @@
 
       // Clear highlights on touchend (but keep tooltip if visible)
       document.addEventListener('touchend', () => {
+        removeTouchFeedback();
         if (!tooltipVisible) {
           setTimeout(clearLit, 150);
         }
