@@ -320,201 +320,97 @@
       50% { transform: rotate(45deg) translateY(4px); }
     }
 
-    /* ===== NAVIGATION DOTS ===== */
-    .nav-dots {
+    /* ===== TAP HINT ===== */
+    .tap-hint {
       position: fixed;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 50;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
       opacity: 0;
-      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.5s ease;
     }
 
-    .nav-dots.visible {
-      opacity: 1;
+    .tap-hint-text {
+      font-size: clamp(12px, 3vw, 14px);
+      color: rgba(218, 165, 32, 0.6);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 300;
+      animation: tapHintPulse 2s ease-in-out infinite;
     }
 
-    .nav-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(245, 242, 235, 0.25);
-      transition: all 0.3s ease;
-      cursor: pointer;
+    @keyframes tapHintPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
     }
 
-    .nav-dot.active {
-      background: rgba(218, 165, 32, 0.8);
-      box-shadow: 0 0 8px rgba(218, 165, 32, 0.5);
-      transform: scale(1.25);
-    }
-
-    .nav-dot:hover {
-      background: rgba(245, 242, 235, 0.5);
-    }
-
-    .nav-dot.active:hover {
-      background: rgba(218, 165, 32, 1);
-    }
-
-    /* ===== WORD TOOLTIP - Fixed Bottom Panel ===== */
+    /* ===== WORD TOOLTIP - Floating Glassmorphism ===== */
     .word-tooltip {
       position: fixed;
       z-index: 200;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(20, 18, 14, 0.985), rgba(12, 10, 8, 0.995));
-      border-top: 1px solid rgba(218, 165, 32, 0.3);
-      border-radius: 22px 22px 0 0;
-      padding: 24px 28px 32px;
-      padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
-      max-height: 50vh;
+      /* Glassmorphism effect */
+      background: rgba(15, 12, 10, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(218, 165, 32, 0.25);
+      border-radius: 16px;
+      padding: 20px 24px;
+      max-width: min(90vw, 400px);
       box-shadow:
-        0 -10px 50px rgba(0, 0, 0, 0.6),
-        0 0 100px rgba(218, 165, 32, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(218, 165, 32, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(100%);
+      transform: translateY(8px) scale(0.96);
       pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
       will-change: transform, opacity;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
     }
 
     .word-tooltip.visible {
       visibility: visible;
       pointer-events: auto;
-      animation: tooltipSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     .word-tooltip.hiding {
-      animation: tooltipSlideOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes tooltipSlideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(100%);
-      }
-      60% {
-        opacity: 1;
-        transform: translateY(-4%);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes tooltipSlideOut {
-      0% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(100%);
-      }
-    }
-
-    /* Top edge glow accent */
-    .word-tooltip::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: rgba(218, 165, 32, 0.4);
-      border-radius: 0 0 4px 4px;
       opacity: 0;
-    }
-
-    .word-tooltip.visible::before {
-      opacity: 1;
-      animation: handleFadeIn 0.4s ease 0.15s forwards;
-    }
-
-    @keyframes handleFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      transform: translateY(8px) scale(0.96);
     }
 
     .word-tooltip-hebrew {
-      font-size: clamp(30px, 7vw, 38px);
+      font-size: clamp(26px, 6vw, 32px);
       color: var(--gold);
       direction: rtl;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       font-weight: 400;
-      opacity: 0;
-      transform: translateY(12px);
       text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
     }
 
-    .word-tooltip.visible .word-tooltip-hebrew {
-      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s forwards;
-    }
-
     .word-tooltip-transliteration {
-      font-size: clamp(18px, 4.5vw, 22px);
+      font-size: clamp(16px, 4vw, 18px);
       color: var(--cream);
       text-align: center;
       font-style: italic;
       letter-spacing: 0.08em;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(218, 165, 32, 0);
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    .word-tooltip.visible .word-tooltip-transliteration {
-      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards,
-                 dividerFadeIn 0.5s ease 0.3s forwards;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(218, 165, 32, 0.2);
     }
 
     .word-tooltip-tidbit {
-      font-size: clamp(17px, 4.2vw, 20px);
-      color: rgba(245, 242, 235, 0.95);
-      line-height: 1.75;
+      font-size: clamp(14px, 3.5vw, 16px);
+      color: rgba(245, 242, 235, 0.9);
+      line-height: 1.65;
       text-align: center;
       font-weight: 400;
-      max-width: 580px;
-      margin: 0 auto;
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    .word-tooltip.visible .word-tooltip-tidbit {
-      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.22s forwards;
-    }
-
-    @keyframes tooltipContentIn {
-      0% {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes dividerFadeIn {
-      0% {
-        border-bottom-color: rgba(218, 165, 32, 0);
-      }
-      100% {
-        border-bottom-color: rgba(218, 165, 32, 0.25);
-      }
     }
   </style>
 </head>
@@ -577,14 +473,10 @@
     <div class="scroll-hint-chevron"></div>
   </div>
 
-  <div class="nav-dots" id="navDots">
-    <div class="nav-dot active" data-anchor="0"></div>
-    <div class="nav-dot" data-anchor="1"></div>
-    <div class="nav-dot" data-anchor="2"></div>
-    <div class="nav-dot" data-anchor="3"></div>
-    <div class="nav-dot" data-anchor="4"></div>
-    <div class="nav-dot" data-anchor="5"></div>
+  <div class="tap-hint" id="tapHint">
+    <span class="tap-hint-text">Tap the word to explore</span>
   </div>
+
 
   <script>
     // ===== ELEMENTS =====
@@ -611,8 +503,7 @@
     const tooltipTransliteration = $('tooltipTransliteration');
     const tooltipTidbit = $('tooltipTidbit');
     const scrollHint = $('scrollHint');
-    const navDots = $('navDots');
-    const navDotEls = [...document.querySelectorAll('.nav-dot')];
+    const tapHint = $('tapHint');
 
     // ===== WORD DATA =====
     // Transliterations and contextual tidbits for each Hebrew word
@@ -716,9 +607,42 @@
       // Force reflow for animation restart
       void wordTooltip.offsetHeight;
 
-      // Trigger slide-in animation
+      // Position tooltip near the word
+      const rect = wordEl.getBoundingClientRect();
+      const tooltipRect = wordTooltip.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // Calculate horizontal position (centered on word, clamped to viewport)
+      let left = rect.left + rect.width / 2;
+      const tooltipWidth = Math.min(vw * 0.9, 400);
+      left = Math.max(tooltipWidth / 2 + 12, Math.min(vw - tooltipWidth / 2 - 12, left));
+
+      // Calculate vertical position (prefer above the word, fall back to below)
+      const spaceAbove = rect.top;
+      const spaceBelow = vh - rect.bottom;
+      const tooltipHeight = 180; // Approximate max height
+
+      let top;
+      if (spaceAbove > tooltipHeight + 20 || spaceAbove > spaceBelow) {
+        // Position above the word
+        top = rect.top - 12;
+        wordTooltip.style.transform = 'translate(-50%, -100%) scale(1)';
+      } else {
+        // Position below the word
+        top = rect.bottom + 12;
+        wordTooltip.style.transform = 'translate(-50%, 0) scale(1)';
+      }
+
+      wordTooltip.style.left = left + 'px';
+      wordTooltip.style.top = top + 'px';
+
+      // Trigger animation
       wordTooltip.classList.add('visible');
       tooltipVisible = true;
+
+      // Hide tap hint when user interacts
+      hideTapHint();
     }
 
     function hideTooltip() {
@@ -1278,15 +1202,16 @@
       verseNum.textContent = state.verseNum;
       verseNum.style.opacity = state.verseNum ? 1 : 0;
 
-      // Update navigation dots
-      updateNavDots(p);
+      // Update navigation hints
+      updateHints(p);
 
       requestAnimationFrame(render);
     }
 
     // ===== NAVIGATION UI =====
     let scrollHintHidden = false;
-    let navDotsVisible = false;
+    let tapHintVisible = false;
+    let tapHintHidden = false;
 
     function hideScrollHint() {
       if (!scrollHintHidden) {
@@ -1299,54 +1224,36 @@
       }
     }
 
-    function showNavDots() {
-      if (!navDotsVisible) {
-        navDotsVisible = true;
-        navDots.classList.add('visible');
+    function showTapHint() {
+      if (!tapHintVisible && !tapHintHidden && tapHint) {
+        tapHintVisible = true;
+        tapHint.style.opacity = '1';
       }
     }
 
-    function updateNavDots(p) {
-      // Find closest anchor
-      let closest = 0;
-      let minDist = Infinity;
-      for (const a of ANCHORS) {
-        const d = Math.abs(p - a);
-        if (d < minDist) {
-          minDist = d;
-          closest = a;
-        }
+    function hideTapHint() {
+      if (tapHintVisible && tapHint) {
+        tapHintHidden = true;
+        tapHint.style.transition = 'opacity 0.5s ease';
+        tapHint.style.opacity = '0';
+        setTimeout(() => {
+          tapHint.style.display = 'none';
+        }, 500);
       }
+    }
 
-      // Update dot states
-      navDotEls.forEach((dot, i) => {
-        if (i === closest) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
-      });
-
-      // Show nav dots after moving past first screen, hide on intro
+    function updateHints(p) {
+      // Hide scroll hint when user starts scrolling
       if (p > 0.3) {
-        showNavDots();
         hideScrollHint();
-      } else if (p < 0.1) {
-        navDots.classList.remove('visible');
-        navDotsVisible = false;
       }
-    }
 
-    function setupNavDots() {
-      navDotEls.forEach((dot, i) => {
-        dot.addEventListener('click', () => {
-          timeline.set(ANCHORS[i]);
-        });
-        dot.addEventListener('touchstart', e => {
-          e.preventDefault();
-          timeline.set(ANCHORS[i]);
-        }, { passive: false });
-      });
+      // Show tap hint when on Qohelet-only screen (anchor 2)
+      if (p > 1.8 && p < 2.2 && !tapHintHidden) {
+        showTapHint();
+      } else if (p < 1.5 || p > 2.5) {
+        if (tapHintVisible) hideTapHint();
+      }
     }
     
     // ===== INPUT =====
@@ -1428,7 +1335,6 @@
     function init() {
       measure();
       setupHitDetection();
-      setupNavDots();
       startTime = Date.now();
 
       timeline.snap(0);
