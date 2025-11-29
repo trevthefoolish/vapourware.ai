@@ -351,66 +351,212 @@
       position: fixed;
       z-index: 200;
       /* Glassmorphism effect */
-      background: rgba(15, 12, 10, 0.75);
+      background: rgba(15, 12, 10, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(218, 165, 32, 0.25);
-      border-radius: 16px;
-      padding: 20px 24px;
-      max-width: min(90vw, 400px);
+      border: 1px solid rgba(218, 165, 32, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      max-width: min(320px, 85vw);
       box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(218, 165, 32, 0.08),
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(218, 165, 32, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(8px) scale(0.96);
+      transform: translateY(12px) scale(0.92);
+      transform-origin: top center;
       pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
       will-change: transform, opacity;
-      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
     }
 
     .word-tooltip.visible {
       visibility: visible;
       pointer-events: auto;
-      opacity: 1;
-      transform: translateY(0) scale(1);
+      animation: tooltipSpringIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
     .word-tooltip.hiding {
+      animation: tooltipSpringOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .word-tooltip.above {
+      transform-origin: bottom center;
+    }
+
+    @keyframes tooltipSpringIn {
+      0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.02);
+      }
+      75% {
+        transform: translateY(1px) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOut {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.95);
+      }
+    }
+
+    /* Above tooltip animations (inverted direction) */
+    .word-tooltip.above.visible {
+      animation: tooltipSpringInAbove 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .word-tooltip.above.hiding {
+      animation: tooltipSpringOutAbove 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes tooltipSpringInAbove {
+      0% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 12px)) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(calc(-100% - 3px)) scale(1.02);
+      }
+      75% {
+        transform: translateY(calc(-100% + 1px)) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOutAbove {
+      0% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 8px)) scale(0.95);
+      }
+    }
+
+    /* Tooltip border shimmer effect */
+    .word-tooltip::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 13px;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba(218, 165, 32, 0.4) 0%,
+        rgba(218, 165, 32, 0.1) 40%,
+        rgba(218, 165, 32, 0.1) 60%,
+        rgba(218, 165, 32, 0.4) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
       opacity: 0;
-      transform: translateY(8px) scale(0.96);
+      animation: borderShimmer 3s ease-in-out infinite;
+    }
+
+    .word-tooltip.visible::before {
+      opacity: 1;
+    }
+
+    @keyframes borderShimmer {
+      0%, 100% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+      }
+      50% {
+        background-position: 100% 100%;
+        opacity: 1;
+      }
     }
 
     .word-tooltip-hebrew {
-      font-size: clamp(26px, 6vw, 32px);
+      font-size: clamp(22px, 5vw, 28px);
       color: var(--gold);
       direction: rtl;
       text-align: center;
       margin-bottom: 6px;
       font-weight: 400;
       text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .word-tooltip.visible .word-tooltip-hebrew {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
     }
 
     .word-tooltip-transliteration {
-      font-size: clamp(16px, 4vw, 18px);
+      font-size: clamp(14px, 3.5vw, 16px);
       color: var(--cream);
       text-align: center;
       font-style: italic;
-      letter-spacing: 0.08em;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(218, 165, 32, 0);
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-transliteration {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s forwards,
+                 dividerFadeIn 0.5s ease 0.25s forwards;
     }
 
     .word-tooltip-tidbit {
-      font-size: clamp(14px, 3.5vw, 16px);
-      color: rgba(245, 242, 235, 0.9);
-      line-height: 1.65;
-      text-align: center;
-      font-weight: 400;
+      font-size: clamp(13px, 3.2vw, 15px);
+      color: rgba(232, 228, 220, 0.85);
+      line-height: 1.6;
+      text-align: left;
+      font-weight: 300;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-tidbit {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+    }
+
+    @keyframes tooltipContentIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes dividerFadeIn {
+      0% {
+        border-bottom-color: rgba(218, 165, 32, 0);
+      }
+      100% {
+        border-bottom-color: rgba(218, 165, 32, 0.25);
+      }
     }
   </style>
 </head>
@@ -601,43 +747,46 @@
       tooltipTransliteration.textContent = data.transliteration;
       tooltipTidbit.textContent = data.tidbit;
 
-      // Remove animation classes before showing
-      wordTooltip.classList.remove('visible', 'hiding');
+      // Position the tooltip
+      const rect = wordEl.getBoundingClientRect();
+
+      // Calculate position - prefer below the word, centered
+      let left = rect.left + rect.width / 2 - 160; // 160 = half of max-width 320
+      let top = rect.bottom + 14;
+      let isAbove = false;
+
+      // Adjust if too close to edges
+      const padding = 12;
+      if (left < padding) left = padding;
+      if (left + 320 > window.innerWidth - padding) {
+        left = window.innerWidth - 320 - padding;
+      }
+
+      // If below would go off screen, show above
+      if (top + 150 > window.innerHeight) {
+        top = rect.top - 14;
+        isAbove = true;
+      }
+
+      // Remove animation classes before repositioning
+      wordTooltip.classList.remove('visible', 'hiding', 'above');
+
+      // Position first
+      wordTooltip.style.left = left + 'px';
+      wordTooltip.style.top = top + 'px';
+
+      // Add direction-aware class
+      if (isAbove) {
+        wordTooltip.classList.add('above');
+        wordTooltip.style.transform = 'translateY(-100%)';
+      } else {
+        wordTooltip.style.transform = '';
+      }
 
       // Force reflow for animation restart
       void wordTooltip.offsetHeight;
 
-      // Position tooltip near the word
-      const rect = wordEl.getBoundingClientRect();
-      const tooltipRect = wordTooltip.getBoundingClientRect();
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      // Calculate horizontal position (centered on word, clamped to viewport)
-      let left = rect.left + rect.width / 2;
-      const tooltipWidth = Math.min(vw * 0.9, 400);
-      left = Math.max(tooltipWidth / 2 + 12, Math.min(vw - tooltipWidth / 2 - 12, left));
-
-      // Calculate vertical position (prefer above the word, fall back to below)
-      const spaceAbove = rect.top;
-      const spaceBelow = vh - rect.bottom;
-      const tooltipHeight = 180; // Approximate max height
-
-      let top;
-      if (spaceAbove > tooltipHeight + 20 || spaceAbove > spaceBelow) {
-        // Position above the word
-        top = rect.top - 12;
-        wordTooltip.style.transform = 'translate(-50%, -100%) scale(1)';
-      } else {
-        // Position below the word
-        top = rect.bottom + 12;
-        wordTooltip.style.transform = 'translate(-50%, 0) scale(1)';
-      }
-
-      wordTooltip.style.left = left + 'px';
-      wordTooltip.style.top = top + 'px';
-
-      // Trigger animation
+      // Trigger spring-in animation
       wordTooltip.classList.add('visible');
       tooltipVisible = true;
 
@@ -654,7 +803,7 @@
 
       // Remove after animation completes
       hideTooltipTimer = setTimeout(() => {
-        wordTooltip.classList.remove('hiding');
+        wordTooltip.classList.remove('hiding', 'above');
         hideTooltipTimer = null;
       }, 250);
 
