@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ecclesiastes 1:1-2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Core palette */
+      --gold: #daa520;
+      --gold-lit: #f0d060;
+      --cream: #e8e4dc;
+      --cream-dim: rgba(232, 228, 220, 0.4);
+      --bg: #0a0a0a;
+      
+      /* Typography - single source of truth */
+      --font-title-en: clamp(22px, 5vw, 32px);
+      --font-title-he: clamp(44px, 11vw, 70px);
+      --font-word-he: clamp(24px, 6vw, 34px);
+      --font-word-en: clamp(16px, 4vw, 21px);
+      
+      /* Spacing */
+      --word-padding: 0.15em 0.25em;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .scene {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== ENGLISH TITLE ===== */
+    .title-en {
+      position: absolute;
+      font-size: var(--font-title-en);
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      will-change: transform, opacity;
+    }
+
+    /* ===== HEBREW TITLE (קֹהֶלֶת) ===== */
+    .title-he {
+      position: fixed;
+      font-size: var(--font-title-he);
+      font-weight: 400;
+      color: var(--gold);
+      direction: rtl;
+      z-index: 100;
+      will-change: transform, opacity;
+      transform-origin: center center;
+      /* MUST match .word-he padding proportionally */
+      padding: var(--word-padding);
+    }
+    
+    .title-he.lit {
+      color: var(--gold-lit);
+      text-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
+    }
+
+    /* ===== VERSES ===== */
+    .verse {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: min(90vw, 640px);
+      will-change: transform, opacity;
+    }
+
+    .verse-he {
+      direction: rtl;
+      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.2em 0.3em;
+      line-height: 1.4;
+    }
+
+    .verse-en {
+      font-size: var(--font-word-en);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 2.2;
+      margin-top: 1em;
+      text-align: center;
+      /* Resting state color */
+      color: var(--cream-dim);
+      will-change: opacity;
+    }
+
+    /* ===== HEBREW WORDS ===== */
+    .word-he {
+      font-size: var(--font-word-he);
+      font-weight: 400;
+      /* Resting state: full gold, full opacity */
+      color: var(--gold);
+      padding: var(--word-padding);
+      cursor: pointer;
+      transition: color 0.25s ease, text-shadow 0.25s ease;
+      will-change: transform, opacity;
+    }
+    
+    .word-he.lit {
+      color: var(--gold-lit);
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+    }
+
+    /* ===== ENGLISH WORDS ===== */
+    .word-en {
+      /* Resting state: dim cream */
+      color: var(--cream-dim);
+      padding: 0.1em 0.15em;
+      cursor: pointer;
+      transition: color 0.25s ease, text-shadow 0.25s ease;
+    }
+    
+    .word-en.lit {
+      color: var(--cream);
+      text-shadow: 0 0 12px rgba(232, 228, 220, 0.5);
+    }
+
+    /* ===== PLACEHOLDER ===== */
+    .placeholder {
+      /* MUST exactly match .word-he */
+      font-size: var(--font-word-he);
+      font-weight: 400;
+      color: transparent;
+      padding: var(--word-padding);
+    }
+
+    /* ===== UI ===== */
+    .progress {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: rgba(218, 165, 32, 0.4);
+    }
+    
+    .verse-num {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      font-size: 13px;
+      color: var(--cream-dim);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="title-en" id="titleEn">Ecclesiastes</div>
+    
+    <div class="verse" id="verse1">
+      <div class="verse-he">
+        <span class="word-he" data-link="words">דִּבְרֵי</span>
+        <span class="placeholder" id="ph1">קֹהֶלֶת</span>
+        <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
+        <span class="word-he" data-link="king">מֶלֶךְ</span>
+        <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
+      </div>
+      <div class="verse-en" id="verse1En">The <span class="word-en" data-link="words">words</span> of the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="son">son of David</span>, <span class="word-en" data-link="king">king</span> in <span class="word-en" data-link="jerusalem">Jerusalem</span></div>
+    </div>
+    
+    <div class="verse" id="verse2">
+      <div class="verse-he">
+        <span class="word-he" data-link="vanity">הֲבֵל</span>
+        <span class="word-he" data-link="vanity">הֲבָלִים</span>
+        <span class="word-he" data-link="says">אָמַר</span>
+        <span class="placeholder" id="ph2">קֹהֶלֶת</span>
+        <span class="word-he" data-link="vanity">הֲבֵל</span>
+        <span class="word-he" data-link="vanity">הֲבָלִים</span>
+        <span class="word-he" data-link="all">הַכֹּל</span>
+        <span class="word-he" data-link="vanity">הָבֶל</span>
+      </div>
+      <div class="verse-en" id="verse2En"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
+    </div>
+  </div>
+  
+  <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
+  
+  <div class="progress" id="progress"></div>
+  <div class="verse-num" id="verseNum"></div>
+
+  <script>
+    // ===== ELEMENTS =====
+    const $ = id => document.getElementById(id);
+    const titleEn = $('titleEn');
+    const qohelet = $('qohelet');
+    const verse1 = $('verse1');
+    const verse2 = $('verse2');
+    const verse1En = $('verse1En');
+    const verse2En = $('verse2En');
+    const ph1 = $('ph1');
+    const ph2 = $('ph2');
+    const progress = $('progress');
+    const verseNum = $('verseNum');
+    
+    const v1Words = [...verse1.querySelectorAll('.word-he')];
+    const v2Words = [...verse2.querySelectorAll('.word-he')];
+
+    // ===== HIGHLIGHTING =====
+    function clearLit() {
+      document.querySelectorAll('.lit').forEach(el => el.classList.remove('lit'));
+    }
+    
+    function lightUp(linkValue) {
+      if (!linkValue) return;
+      clearLit();
+      document.querySelectorAll(`[data-link="${linkValue}"]`).forEach(el => el.classList.add('lit'));
+    }
+    
+    function findWordAtPoint(x, y, container) {
+      for (const word of container.querySelectorAll('[data-link]')) {
+        const r = word.getBoundingClientRect();
+        if (x >= r.left - 8 && x <= r.right + 8 && y >= r.top - 8 && y <= r.bottom + 8) {
+          return word.dataset.link;
+        }
+      }
+      return null;
+    }
+    
+    function setupHitDetection() {
+      [verse1, verse2].forEach(c => {
+        c.addEventListener('mousemove', e => {
+          const link = findWordAtPoint(e.clientX, e.clientY, c);
+          if (link) lightUp(link);
+        });
+        c.addEventListener('touchstart', e => {
+          const t = e.touches[0];
+          const link = findWordAtPoint(t.clientX, t.clientY, c);
+          if (link) lightUp(link);
+        }, { passive: true });
+        c.addEventListener('mouseleave', clearLit);
+      });
+      qohelet.addEventListener('mouseenter', () => lightUp('teacher'));
+      qohelet.addEventListener('mouseleave', clearLit);
+      qohelet.addEventListener('touchstart', () => lightUp('teacher'), { passive: true });
+      document.addEventListener('touchend', () => setTimeout(clearLit, 150), { passive: true });
+    }
+
+    // ===== EASING =====
+    function ease(t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return (1 - Math.cos(t * Math.PI)) / 2;
+    }
+
+    // ===== SPRING =====
+    class Spring {
+      constructor(v = 0) {
+        this.value = v;
+        this.target = v;
+        this.velocity = 0;
+        this.baseTension = 30;
+        this.baseFriction = 9;
+        this.intensity = 0;
+        this.lastInput = 0;
+      }
+      
+      nudge(d) {
+        this.target = Math.max(0, Math.min(MAX, this.target + d));
+        this.intensity = Math.min(1, this.intensity + 0.25);
+        this.lastInput = Date.now();
+      }
+      
+      set(t) {
+        this.target = Math.max(0, Math.min(MAX, t));
+        this.intensity = Math.min(1, this.intensity + 0.15);
+        this.lastInput = Date.now();
+      }
+      
+      update(dt = 1/60) {
+        // Decay intensity
+        if (Date.now() - this.lastInput > 80) {
+          this.intensity *= 0.92;
+        }
+        
+        // Responsive physics
+        const tension = this.baseTension + this.intensity * 60;
+        const friction = this.baseFriction + this.intensity * 5;
+        
+        const d = this.target - this.value;
+        this.velocity += (d * tension - this.velocity * friction) * dt;
+        this.value += this.velocity * dt;
+        
+        // Clamp to valid range and kill velocity at boundaries
+        if (this.value <= 0) {
+          this.value = 0;
+          if (this.velocity < 0) this.velocity = 0;
+        }
+        if (this.value >= MAX) {
+          this.value = MAX;
+          if (this.velocity > 0) this.velocity = 0;
+        }
+        
+        // Snap to target when close enough (decisive settling)
+        if (Math.abs(d) < 0.015 && Math.abs(this.velocity) < 0.01) {
+          this.value = this.target;
+          this.velocity = 0;
+        }
+        
+        return this.value;
+      }
+      
+      snap(v) {
+        this.value = Math.max(0, Math.min(MAX, v));
+        this.target = this.value;
+        this.velocity = 0;
+        this.intensity = 0;
+      }
+    }
+
+    // ===== STATE =====
+    const MAX = 4;
+    const ANCHORS = [0, 1, 2, 3, 4];
+    const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
+    
+    const timeline = new Spring(0);
+    let pos = {};
+    let startTime = Date.now();
+    
+    function measure() {
+      // Reset for measurement
+      titleEn.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
+      qohelet.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
+      verse1.style.cssText = 'position:absolute;opacity:1;transform:none';
+      verse2.style.cssText = 'position:absolute;opacity:1;transform:none';
+      v1Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+      v2Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+      
+      void document.body.offsetHeight;
+      
+      const scene = document.querySelector('.scene').getBoundingClientRect();
+      const ph1R = ph1.getBoundingClientRect();
+      const ph2R = ph2.getBoundingClientRect();
+      
+      pos = {
+        cx: scene.left + scene.width / 2,
+        cy: scene.top + scene.height / 2,
+        slot1: { x: ph1R.left + ph1R.width / 2, y: ph1R.top + ph1R.height / 2 },
+        slot2: { x: ph2R.left + ph2R.width / 2, y: ph2R.top + ph2R.height / 2 },
+        scale: parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize)
+      };
+    }
+
+    // ===== EXACT ANCHOR STATES =====
+    // These are the guaranteed "resting" states - no interpolation
+    
+    function getAnchorState(anchor) {
+      switch(anchor) {
+        case 0: return {
+          en: { x: pos.cx, y: pos.cy, opacity: 1 },
+          q: { x: pos.cx, y: pos.cy + 70, scale: 1, opacity: 0 },
+          v1: { opacity: 0, y: 25 },
+          v2: { opacity: 0, y: 25 },
+          v1Words: 0,
+          v2Words: 0,
+          v1En: 0,
+          v2En: 0,
+          verseNum: ''
+        };
+        case 1: return {
+          en: { x: pos.cx, y: pos.cy - 50, opacity: 1 },
+          q: { x: pos.cx, y: pos.cy + 40, scale: 1, opacity: 1 },
+          v1: { opacity: 0, y: 25 },
+          v2: { opacity: 0, y: 25 },
+          v1Words: 0,
+          v2Words: 0,
+          v1En: 0,
+          v2En: 0,
+          verseNum: ''
+        };
+        case 2: return {
+          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
+          q: { x: pos.cx, y: pos.cy, scale: 1, opacity: 1 },
+          v1: { opacity: 0, y: 25 },
+          v2: { opacity: 0, y: 25 },
+          v1Words: 0,
+          v2Words: 0,
+          v1En: 0,
+          v2En: 0,
+          verseNum: ''
+        };
+        case 3: return {
+          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
+          q: { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 },
+          v1: { opacity: 1, y: 0 },
+          v2: { opacity: 0, y: 25 },
+          v1Words: 1, // All visible
+          v2Words: 0,
+          v1En: 1,
+          v2En: 0,
+          verseNum: '1:1'
+        };
+        case 4: return {
+          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
+          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 },
+          v1: { opacity: 0, y: -15 },
+          v2: { opacity: 1, y: 0 },
+          v1Words: 0,
+          v2Words: 1, // All visible
+          v1En: 0,
+          v2En: 1,
+          verseNum: '1:2'
+        };
+      }
+    }
+    
+    // ===== INTERPOLATED STATES =====
+    // Only used when between anchors
+    
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    
+    function lerpState(s1, s2, t) {
+      const e = ease(t);
+      return {
+        en: {
+          x: lerp(s1.en.x, s2.en.x, e),
+          y: lerp(s1.en.y, s2.en.y, e),
+          opacity: lerp(s1.en.opacity, s2.en.opacity, e)
+        },
+        q: {
+          x: lerp(s1.q.x, s2.q.x, e),
+          y: lerp(s1.q.y, s2.q.y, e),
+          scale: lerp(s1.q.scale, s2.q.scale, e),
+          opacity: lerp(s1.q.opacity, s2.q.opacity, e)
+        },
+        v1: {
+          opacity: lerp(s1.v1.opacity, s2.v1.opacity, e),
+          y: lerp(s1.v1.y, s2.v1.y, e)
+        },
+        v2: {
+          opacity: lerp(s1.v2.opacity, s2.v2.opacity, e),
+          y: lerp(s1.v2.y, s2.v2.y, e)
+        },
+        v1Words: lerp(s1.v1Words, s2.v1Words, e),
+        v2Words: lerp(s1.v2Words, s2.v2Words, e),
+        v1En: lerp(s1.v1En, s2.v1En, e),
+        v2En: lerp(s1.v2En, s2.v2En, e),
+        verseNum: e > 0.5 ? s2.verseNum : s1.verseNum
+      };
+    }
+    
+    function getState(p) {
+      // Clamp
+      p = Math.max(0, Math.min(MAX, p));
+      
+      // Check if at anchor (use exact state)
+      for (const a of ANCHORS) {
+        if (Math.abs(p - a) < SNAP_THRESHOLD) {
+          return getAnchorState(a);
+        }
+      }
+      
+      // Find which segment we're in
+      let lower = 0, upper = MAX;
+      for (let i = 0; i < ANCHORS.length - 1; i++) {
+        if (p >= ANCHORS[i] && p <= ANCHORS[i + 1]) {
+          lower = ANCHORS[i];
+          upper = ANCHORS[i + 1];
+          break;
+        }
+      }
+      
+      // Interpolate
+      const t = (p - lower) / (upper - lower);
+      return lerpState(getAnchorState(lower), getAnchorState(upper), t);
+    }
+
+    // ===== RENDER =====
+    function render() {
+      const p = timeline.update();
+      const state = getState(p);
+      const time = Date.now() - startTime;
+      
+      // Subtle ambient motion only at true rest
+      const atRest = Math.abs(timeline.velocity) < 0.01;
+      const ambY = atRest ? Math.sin(time * 0.0006) * 2 : 0;
+      const ambS = atRest ? 1 + Math.sin(time * 0.0008) * 0.002 : 1;
+      
+      // English title
+      titleEn.style.left = state.en.x + 'px';
+      titleEn.style.top = (state.en.y + (state.en.opacity > 0.5 ? ambY * 0.5 : 0)) + 'px';
+      titleEn.style.transform = 'translate(-50%, -50%)';
+      titleEn.style.opacity = state.en.opacity;
+      
+      // Qohelet
+      const qAmbY = (p >= 1.8 && p <= 2.2 && atRest) ? ambY : 0;
+      const qAmbS = (p >= 1.8 && p <= 2.2 && atRest) ? ambS : 1;
+      qohelet.style.left = state.q.x + 'px';
+      qohelet.style.top = (state.q.y + qAmbY) + 'px';
+      qohelet.style.transform = `translate(-50%, -50%) scale(${state.q.scale * qAmbS})`;
+      qohelet.style.opacity = state.q.opacity;
+      qohelet.style.pointerEvents = state.q.opacity > 0.5 ? 'auto' : 'none';
+      
+      // Verse 1
+      verse1.style.opacity = state.v1.opacity;
+      verse1.style.transform = `translateY(${state.v1.y}px)`;
+      verse1.style.pointerEvents = state.v1.opacity > 0.2 ? 'auto' : 'none';
+      
+      // V1 words - stagger based on state.v1Words (0 to 1)
+      // Formula ensures all words reach 1 when v1Words = 1
+      v1Words.forEach((w, i) => {
+        const progress = state.v1Words * (v1Words.length + 1);
+        const wordT = Math.max(0, Math.min(1, progress - i));
+        w.style.opacity = wordT;
+        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+      });
+      
+      // V1 English
+      verse1En.style.opacity = state.v1En;
+      
+      // Verse 2
+      verse2.style.opacity = state.v2.opacity;
+      verse2.style.transform = `translateY(${state.v2.y}px)`;
+      verse2.style.pointerEvents = state.v2.opacity > 0.2 ? 'auto' : 'none';
+      
+      // V2 words
+      v2Words.forEach((w, i) => {
+        const progress = state.v2Words * (v2Words.length + 1);
+        const wordT = Math.max(0, Math.min(1, progress - i));
+        w.style.opacity = wordT;
+        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+      });
+      
+      // V2 English
+      verse2En.style.opacity = state.v2En;
+      
+      // Progress
+      progress.style.width = (p / MAX * 100) + '%';
+      
+      // Verse number
+      verseNum.textContent = state.verseNum;
+      verseNum.style.opacity = state.verseNum ? 1 : 0;
+      
+      requestAnimationFrame(render);
+    }
+    
+    // ===== INPUT =====
+    function snap() {
+      let best = ANCHORS[0], bestD = Infinity;
+      for (const a of ANCHORS) {
+        const d = Math.abs(timeline.target - a);
+        if (d < bestD) { bestD = d; best = a; }
+      }
+      timeline.set(best);
+    }
+    
+    function next() {
+      for (const a of ANCHORS) if (a > timeline.target + 0.05) { timeline.set(a); return; }
+    }
+    
+    function prev() {
+      for (let i = ANCHORS.length - 1; i >= 0; i--)
+        if (ANCHORS[i] < timeline.target - 0.05) { timeline.set(ANCHORS[i]); return; }
+    }
+    
+    let keyHeld = false, keyTimer = null;
+    
+    document.addEventListener('keydown', e => {
+      if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (!keyHeld) {
+          next();
+          keyHeld = true;
+          keyTimer = setInterval(() => timeline.nudge(0.06), 50);
+        }
+      } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        e.preventDefault();
+        if (!keyHeld) {
+          prev();
+          keyHeld = true;
+          keyTimer = setInterval(() => timeline.nudge(-0.06), 50);
+        }
+      }
+    });
+    
+    document.addEventListener('keyup', e => {
+      if (['ArrowDown', 'ArrowRight', ' ', 'ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        keyHeld = false;
+        clearInterval(keyTimer);
+        snap();
+      }
+    });
+    
+    let touch = { y: 0, scrolling: false };
+    
+    document.addEventListener('touchstart', e => {
+      touch.y = e.touches[0].clientY;
+      touch.scrolling = false;
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', e => {
+      const dy = e.touches[0].clientY - touch.y;
+      if (Math.abs(dy) > 8) touch.scrolling = true;
+      if (touch.scrolling) {
+        timeline.nudge(-dy / 280);
+        touch.y = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    
+    document.addEventListener('touchend', () => {
+      if (touch.scrolling) snap();
+    });
+    
+    let wheelTimer;
+    document.addEventListener('wheel', e => {
+      e.preventDefault();
+      timeline.nudge(e.deltaY / 320);
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(snap, 100);
+    }, { passive: false });
+    
+    // ===== INIT =====
+    function init() {
+      measure();
+      setupHitDetection();
+      startTime = Date.now();
+      
+      timeline.snap(0);
+      
+      // Apply initial state
+      const s = getAnchorState(0);
+      titleEn.style.opacity = s.en.opacity;
+      qohelet.style.opacity = s.q.opacity;
+      verse1.style.opacity = s.v1.opacity;
+      verse2.style.opacity = s.v2.opacity;
+      
+      requestAnimationFrame(render);
+    }
+    
+    document.fonts.ready.then(init);
+    window.addEventListener('resize', () => setTimeout(measure, 100));
+  </script>
+</body>
+</html>
