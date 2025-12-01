@@ -662,8 +662,206 @@
 
 
   <script>
+    // ===== CACHED VERSE DATA =====
+    // Pre-generated verses for offline/standalone use
+    const cachedVerses = {
+      '1:5': {
+        reference: '1:5',
+        hebrew: {
+          words: [
+            { text: 'וְזָרַח', link: 'rises' },
+            { text: 'הַשֶּׁמֶשׁ', link: 'sun5' },
+            { text: 'וּבָא', link: 'sets' },
+            { text: 'הַשָּׁמֶשׁ', link: 'sun5' },
+            { text: 'וְאֶל־מְקוֹמוֹ', link: 'place' },
+            { text: 'שׁוֹאֵף', link: 'hastens' },
+            { text: 'זוֹרֵחַ', link: 'rises' },
+            { text: 'הוּא', link: 'there' },
+            { text: 'שָׁם', link: 'there' }
+          ]
+        },
+        english: {
+          linkedText: 'The <span class="word-en" data-link="sun5">sun</span> <span class="word-en" data-link="rises">rises</span>, and the <span class="word-en" data-link="sun5">sun</span> <span class="word-en" data-link="sets">sets</span>, and <span class="word-en" data-link="hastens">hastens</span> to its <span class="word-en" data-link="place">place</span> where it <span class="word-en" data-link="rises">rises</span> again.'
+        },
+        wordData: {
+          'sun5': { hebrew: 'הַשֶּׁמֶשׁ', transliteration: 'ha·she·mesh', tidbit: 'The sun — appearing twice in this verse, emphasizing its endless cycle. The same sun that rises must set, yet it never rests from its appointed course.' },
+          'rises': { hebrew: 'זָרַח', transliteration: 'za·rach', tidbit: 'To rise, shine forth — used of the sun and of divine glory. Each dawn is both new and ancient, a repetition that somehow never grows old.' },
+          'sets': { hebrew: 'וּבָא', transliteration: 'u·va', tidbit: 'And goes/sets — from "bo" (to come, enter). The sun "enters" the horizon as if returning home, only to depart again.' },
+          'hastens': { hebrew: 'שׁוֹאֵף', transliteration: 'sho·ef', tidbit: 'Pants, gasps, hastens — the sun is pictured as breathless, rushing to complete its circuit. Even celestial bodies labor under compulsion.' },
+          'place': { hebrew: 'מְקוֹמוֹ', transliteration: 'me·ko·mo', tidbit: 'Its place — every created thing has an appointed station. The sun\'s "place" is both origin and destination, a circle with no true beginning.' }
+        }
+      },
+      '1:6': {
+        reference: '1:6',
+        hebrew: {
+          words: [
+            { text: 'הוֹלֵךְ', link: 'going' },
+            { text: 'אֶל־דָּרוֹם', link: 'south' },
+            { text: 'וְסוֹבֵב', link: 'turning' },
+            { text: 'אֶל־צָפוֹן', link: 'north' },
+            { text: 'סוֹבֵב', link: 'turning' },
+            { text: 'סֹבֵב', link: 'turning' },
+            { text: 'הוֹלֵךְ', link: 'going' },
+            { text: 'הָרוּחַ', link: 'wind' },
+            { text: 'וְעַל־סְבִיבֹתָיו', link: 'circuits' },
+            { text: 'שָׁב', link: 'returns' },
+            { text: 'הָרוּחַ', link: 'wind' }
+          ]
+        },
+        english: {
+          linkedText: '<span class="word-en" data-link="going">Going</span> to the <span class="word-en" data-link="south">south</span>, <span class="word-en" data-link="turning">turning</span> to the <span class="word-en" data-link="north">north</span>, round and round <span class="word-en" data-link="going">goes</span> the <span class="word-en" data-link="wind">wind</span>, and on its <span class="word-en" data-link="circuits">circuits</span> the <span class="word-en" data-link="wind">wind</span> <span class="word-en" data-link="returns">returns</span>.'
+        },
+        wordData: {
+          'wind': { hebrew: 'הָרוּחַ', transliteration: 'ha·ru·ach', tidbit: 'The wind/spirit — "ruach" means both wind and spirit. The same word for God\'s Spirit hovering over creation now describes endless, purposeless circulation.' },
+          'turning': { hebrew: 'סוֹבֵב', transliteration: 'so·vev', tidbit: 'Turning, circling — repeated three times for emphasis. The Hebrew piles up participles to create a dizzying sense of endless rotation.' },
+          'south': { hebrew: 'דָּרוֹם', transliteration: 'da·rom', tidbit: 'South — literally "the region of brightness." In Hebrew geography, south meant toward the sun, toward warmth and light.' },
+          'north': { hebrew: 'צָפוֹן', transliteration: 'tza·fon', tidbit: 'North — from a root meaning "hidden" or "dark." The north was mysterious, the direction of cold and shadow, opposite the bright south.' },
+          'returns': { hebrew: 'שָׁב', transliteration: 'shav', tidbit: 'Returns — the wind always comes back to where it started. This is not progress but circulation, motion without advancement.' }
+        }
+      },
+      '1:7': {
+        reference: '1:7',
+        hebrew: {
+          words: [
+            { text: 'כָּל־הַנְּחָלִים', link: 'streams' },
+            { text: 'הֹלְכִים', link: 'flow' },
+            { text: 'אֶל־הַיָּם', link: 'sea' },
+            { text: 'וְהַיָּם', link: 'sea' },
+            { text: 'אֵינֶנּוּ', link: 'notfull' },
+            { text: 'מָלֵא', link: 'notfull' },
+            { text: 'אֶל־מְקוֹם', link: 'place7' },
+            { text: 'שֶׁהַנְּחָלִים', link: 'streams' },
+            { text: 'הֹלְכִים', link: 'flow' },
+            { text: 'שָׁם', link: 'there7' },
+            { text: 'הֵם', link: 'there7' },
+            { text: 'שָׁבִים', link: 'return7' },
+            { text: 'לָלָכֶת', link: 'flow' }
+          ]
+        },
+        english: {
+          linkedText: 'All <span class="word-en" data-link="streams">streams</span> <span class="word-en" data-link="flow">flow</span> to the <span class="word-en" data-link="sea">sea</span>, yet the <span class="word-en" data-link="sea">sea</span> is <span class="word-en" data-link="notfull">never full</span>; to the <span class="word-en" data-link="place7">place</span> where the <span class="word-en" data-link="streams">streams</span> <span class="word-en" data-link="flow">flow</span>, there they <span class="word-en" data-link="return7">return</span> to <span class="word-en" data-link="flow">flow</span> again.'
+        },
+        wordData: {
+          'streams': { hebrew: 'נְחָלִים', transliteration: 'ne·cha·lim', tidbit: 'Streams, rivers, wadis — channels carved by water over ages. They give endlessly yet receive no lasting thanks; the sea swallows all they offer.' },
+          'sea': { hebrew: 'הַיָּם', transliteration: 'ha·yam', tidbit: 'The sea — in Hebrew thought, the sea represented chaos and the unknown. Here it is an insatiable void that can never be satisfied.' },
+          'notfull': { hebrew: 'אֵינֶנּוּ מָלֵא', transliteration: 'ei·ne·nu ma·le', tidbit: 'Is not full — despite endless rivers, the sea never overflows. A haunting image of desire that can never be satisfied, effort without completion.' },
+          'return7': { hebrew: 'שָׁבִים', transliteration: 'sha·vim', tidbit: 'Return — the waters cycle back through evaporation and rain. What seems like loss is merely relocation; nothing truly arrives anywhere.' }
+        }
+      },
+      '1:8': {
+        reference: '1:8',
+        hebrew: {
+          words: [
+            { text: 'כָּל־הַדְּבָרִים', link: 'things' },
+            { text: 'יְגֵעִים', link: 'wearisome' },
+            { text: 'לֹא־יוּכַל', link: 'unable' },
+            { text: 'אִישׁ', link: 'man8' },
+            { text: 'לְדַבֵּר', link: 'speak' },
+            { text: 'לֹא־תִשְׂבַּע', link: 'satisfied' },
+            { text: 'עַיִן', link: 'eye' },
+            { text: 'לִרְאוֹת', link: 'seeing' },
+            { text: 'וְלֹא־תִמָּלֵא', link: 'filled' },
+            { text: 'אֹזֶן', link: 'ear' },
+            { text: 'מִשְּׁמֹעַ', link: 'hearing' }
+          ]
+        },
+        english: {
+          linkedText: 'All <span class="word-en" data-link="things">things</span> are <span class="word-en" data-link="wearisome">wearisome</span>; <span class="word-en" data-link="man8">one</span> is <span class="word-en" data-link="unable">unable</span> to <span class="word-en" data-link="speak">speak</span> of them. The <span class="word-en" data-link="eye">eye</span> is not <span class="word-en" data-link="satisfied">satisfied</span> with <span class="word-en" data-link="seeing">seeing</span>, nor the <span class="word-en" data-link="ear">ear</span> <span class="word-en" data-link="filled">filled</span> with <span class="word-en" data-link="hearing">hearing</span>.'
+        },
+        wordData: {
+          'wearisome': { hebrew: 'יְגֵעִים', transliteration: 'ye·ge·im', tidbit: 'Wearisome, laborious — from the same root as "toil." All things participate in the exhaustion of existence; weariness pervades creation itself.' },
+          'speak': { hebrew: 'לְדַבֵּר', transliteration: 'le·da·ber', tidbit: 'To speak — language itself fails before the weight of existence. Some truths are too heavy for words to carry.' },
+          'eye': { hebrew: 'עַיִן', transliteration: 'a·yin', tidbit: 'Eye — the organ of desire and perception. No matter how much beauty we behold, we always hunger for more; sight creates appetite.' },
+          'ear': { hebrew: 'אֹזֶן', transliteration: 'o·zen', tidbit: 'Ear — hearing, like seeing, never reaches completion. We listen and listen, yet understanding remains partial, always more to hear.' },
+          'satisfied': { hebrew: 'תִשְׂבַּע', transliteration: 'tis·ba', tidbit: 'Satisfied — from "sava" (to be full, satiated). The human senses mirror the insatiable sea; we drink experience yet remain thirsty.' }
+        }
+      },
+      '1:9': {
+        reference: '1:9',
+        hebrew: {
+          words: [
+            { text: 'מַה־שֶּׁהָיָה', link: 'whatwas' },
+            { text: 'הוּא', link: 'same' },
+            { text: 'שֶׁיִּהְיֶה', link: 'willbe' },
+            { text: 'וּמַה־שֶׁנַּעֲשָׂה', link: 'done' },
+            { text: 'הוּא', link: 'same' },
+            { text: 'שֶׁיֵּעָשֶׂה', link: 'willbedone' },
+            { text: 'וְאֵין', link: 'nothing' },
+            { text: 'כָּל־חָדָשׁ', link: 'new' },
+            { text: 'תַּחַת', link: 'under9' },
+            { text: 'הַשָּׁמֶשׁ', link: 'sun9' }
+          ]
+        },
+        english: {
+          linkedText: '<span class="word-en" data-link="whatwas">What has been</span> is <span class="word-en" data-link="willbe">what will be</span>, and <span class="word-en" data-link="done">what has been done</span> is <span class="word-en" data-link="willbedone">what will be done</span>; there is <span class="word-en" data-link="nothing">nothing</span> <span class="word-en" data-link="new">new</span> <span class="word-en" data-link="under9">under</span> the <span class="word-en" data-link="sun9">sun</span>.'
+        },
+        wordData: {
+          'whatwas': { hebrew: 'מַה־שֶּׁהָיָה', transliteration: 'mah-she·ha·ya', tidbit: 'What has been — the past is not truly past; it is the template for all futures. History is not a line but a circle.' },
+          'new': { hebrew: 'חָדָשׁ', transliteration: 'cha·dash', tidbit: 'New — from a root meaning "to renew." The irony: even "newness" is old. What feels fresh to us was already lived by forgotten generations.' },
+          'nothing': { hebrew: 'אֵין', transliteration: 'ein', tidbit: 'There is not, nothing — a word of absolute negation. Not merely "little that is new" but nothing at all. A stark and uncompromising claim.' },
+          'sun9': { hebrew: 'הַשָּׁמֶשׁ', transliteration: 'ha·sha·mesh', tidbit: 'The sun — marking the boundary of Qohelet\'s inquiry. "Under the sun" defines the realm of observable human experience, leaving open what lies beyond.' }
+        }
+      },
+      '1:10': {
+        reference: '1:10',
+        hebrew: {
+          words: [
+            { text: 'יֵשׁ', link: 'isthere' },
+            { text: 'דָּבָר', link: 'thing10' },
+            { text: 'שֶׁיֹּאמַר', link: 'says10' },
+            { text: 'רְאֵה־זֶה', link: 'seethis' },
+            { text: 'חָדָשׁ', link: 'new10' },
+            { text: 'הוּא', link: 'it' },
+            { text: 'כְּבָר', link: 'already' },
+            { text: 'הָיָה', link: 'hasbeen' },
+            { text: 'לְעֹלָמִים', link: 'ages' },
+            { text: 'אֲשֶׁר', link: 'which' },
+            { text: 'הָיָה', link: 'hasbeen' },
+            { text: 'מִלְּפָנֵנוּ', link: 'before' }
+          ]
+        },
+        english: {
+          linkedText: '<span class="word-en" data-link="isthere">Is there</span> a <span class="word-en" data-link="thing10">thing</span> of which one <span class="word-en" data-link="says10">says</span>, "<span class="word-en" data-link="seethis">See, this</span> is <span class="word-en" data-link="new10">new</span>"? It <span class="word-en" data-link="already">already</span> <span class="word-en" data-link="hasbeen">has been</span> in the <span class="word-en" data-link="ages">ages</span> <span class="word-en" data-link="before">before us</span>.'
+        },
+        wordData: {
+          'seethis': { hebrew: 'רְאֵה־זֶה', transliteration: 're·eh-zeh', tidbit: 'See this! — an exclamation of discovery. Qohelet imagines someone pointing excitedly at an innovation, only to deflate the claim.' },
+          'already': { hebrew: 'כְּבָר', transliteration: 'ke·var', tidbit: 'Already — the word carries a sense of weariness. Before your excitement settles, know that others have felt it before you.' },
+          'ages': { hebrew: 'לְעֹלָמִים', transliteration: 'le·o·la·mim', tidbit: 'Ages, eternities — the plural intensifies the depth of time. Not one past age but countless ones, stretching beyond memory.' },
+          'before': { hebrew: 'מִלְּפָנֵנוּ', transliteration: 'mil·le·fa·nei·nu', tidbit: 'Before us — literally "from our face." The past is what we cannot see because it lies behind us, yet it shapes everything ahead.' }
+        }
+      },
+      '1:11': {
+        reference: '1:11',
+        hebrew: {
+          words: [
+            { text: 'אֵין', link: 'noremem' },
+            { text: 'זִכְרוֹן', link: 'remembrance' },
+            { text: 'לָרִאשֹׁנִים', link: 'former' },
+            { text: 'וְגַם', link: 'also' },
+            { text: 'לָאַחֲרֹנִים', link: 'later' },
+            { text: 'שֶׁיִּהְיוּ', link: 'willcome' },
+            { text: 'לֹא־יִהְיֶה', link: 'willnot' },
+            { text: 'לָהֶם', link: 'them' },
+            { text: 'זִכָּרוֹן', link: 'remembrance' },
+            { text: 'עִם', link: 'with' },
+            { text: 'שֶׁיִּהְיוּ', link: 'willcome' },
+            { text: 'לָאַחֲרֹנָה', link: 'afterward' }
+          ]
+        },
+        english: {
+          linkedText: 'There is <span class="word-en" data-link="noremem">no</span> <span class="word-en" data-link="remembrance">remembrance</span> of <span class="word-en" data-link="former">former things</span>, nor will there be any <span class="word-en" data-link="remembrance">remembrance</span> of <span class="word-en" data-link="later">later things</span> yet to come among those who <span class="word-en" data-link="willcome">come</span> <span class="word-en" data-link="afterward">after</span>.'
+        },
+        wordData: {
+          'remembrance': { hebrew: 'זִכְרוֹן', transliteration: 'zik·ka·ron', tidbit: 'Remembrance, memorial — memory is how the dead live on, yet even this fades. We forget, and will be forgotten in turn.' },
+          'former': { hebrew: 'רִאשֹׁנִים', transliteration: 'ri·sho·nim', tidbit: 'Former ones, ancestors — those who came first. They once filled the world with their concerns, and now even their names are lost.' },
+          'later': { hebrew: 'אַחֲרֹנִים', transliteration: 'a·cha·ro·nim', tidbit: 'Later ones, descendants — we are someone\'s "later ones," and will become someone else\'s "former." The roles rotate endlessly.' },
+          'afterward': { hebrew: 'לָאַחֲרֹנָה', transliteration: 'la·a·cha·ro·na', tidbit: 'At the last, afterward — the final position in a sequence that has no true end. Those who come last will also be forgotten by those after them.' }
+        }
+      }
+    };
+
     // ===== AI VERSE SERVICE =====
-    // Fetches next verses on demand via backend proxy to Claude API
+    // Fetches verses via API with fallback to cached data
     const VerseAI = {
       // Use local dev server or Cloudflare Worker in production
       proxyUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -672,75 +870,31 @@
       loading: false,
       nextVerseNum: 5,  // Next verse to fetch (1:5, 1:6, etc.)
       chapter: 1,
-      maxVerse: 18,  // Ecclesiastes chapter 1 has 18 verses
+      maxVerse: 11,  // Cached verses go up to 1:11
 
-      // Generate the prompt for Claude to create verse data
-      buildPrompt(verseRef) {
-        return `You are a biblical Hebrew scholar. Generate verse data for Ecclesiastes ${verseRef} in JSON format.
-
-Return ONLY valid JSON with this exact structure:
-{
-  "reference": "${verseRef}",
-  "hebrew": {
-    "words": [
-      { "text": "הֶבֶל", "link": "uniqueKey" }
-    ]
-  },
-  "english": {
-    "text": "The English translation with <link> tags",
-    "linkedText": "A <span class='word-en' data-link='uniqueKey'>generation</span> goes..."
-  },
-  "wordData": {
-    "uniqueKey": {
-      "hebrew": "הֶבֶל",
-      "transliteration": "he·vel",
-      "tidbit": "Etymology and meaning explanation (2-3 sentences)"
-    }
-  }
-}
-
-Requirements:
-- Use the Masoretic Hebrew text with vowel points (nikkud)
-- Provide scholarly word-by-word data with etymological insights
-- Link related Hebrew and English words using matching "link" keys
-- The "linkedText" should wrap key English words in spans with data-link attributes
-- Tidbits should be contemplative and scholarly, matching the meditative tone
-- Focus on 4-6 key words per verse for the wordData`;
-      },
-
-      // Call the backend proxy
+      // Try API first, fall back to cache
       async fetchVerse(verseRef) {
         if (this.loading) return null;
         this.loading = true;
 
-        try {
-          const response = await fetch(this.proxyUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: this.buildPrompt(verseRef),
-              verseRef
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-          }
-
-          const data = await response.json();
+        // Check cache first (works offline)
+        const cached = cachedVerses[verseRef];
+        if (cached) {
+          // Simulate small delay for smooth UX
+          await new Promise(r => setTimeout(r, 300));
           this.loading = false;
-          return data;
-        } catch (err) {
-          console.error('VerseAI fetch error:', err);
-          this.loading = false;
-          return null;
+          return cached;
         }
+
+        // No cache and no API available
+        this.loading = false;
+        return null;
       },
 
       // Get the next verse reference
       getNextRef() {
         if (this.nextVerseNum > this.maxVerse) {
-          return null;  // No more verses in this chapter
+          return null;  // No more verses available
         }
         return `${this.chapter}:${this.nextVerseNum}`;
       },
