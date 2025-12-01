@@ -73,24 +73,16 @@
     
     .title-he.lit {
       color: var(--gold-lit);
-      text-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
-      animation: glowPulseTitle 2.5s ease-in-out infinite;
+      --glow-1: 0 0 25px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 40px rgba(218, 165, 32, 0.85), 0 0 70px rgba(218, 165, 32, 0.35);
+      --glow-bright: 1.12;
+      text-shadow: var(--glow-1);
+      animation: glowPulse 2.5s ease-in-out infinite;
     }
 
     .title-he.touch-active {
       transform: translate(-50%, -50%) scale(0.97);
       transition: transform 0.1s ease-out;
-    }
-
-    @keyframes glowPulseTitle {
-      0%, 100% {
-        text-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
-        filter: brightness(1);
-      }
-      50% {
-        text-shadow: 0 0 40px rgba(218, 165, 32, 0.85), 0 0 70px rgba(218, 165, 32, 0.35);
-        filter: brightness(1.12);
-      }
     }
 
     /* ===== VERSES ===== */
@@ -145,13 +137,20 @@
     
     .word-he.lit {
       color: var(--gold-lit);
-      text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-1: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+      --glow-bright: 1.1;
+      text-shadow: var(--glow-1);
       animation: glowPulse 2.5s ease-in-out infinite;
     }
 
     .word-he.lit-stagger {
       color: var(--gold-lit);
-      text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-1: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+      --glow-bright: 1.1;
+      --reveal-peak: 0 0 35px rgba(218, 165, 32, 0.9);
+      text-shadow: var(--glow-1);
       animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
                  glowPulse 2.5s ease-in-out 0.4s infinite;
     }
@@ -161,14 +160,15 @@
       transition: transform 0.1s ease-out;
     }
 
+    /* Unified glow animation - uses CSS custom properties for per-element variation */
     @keyframes glowPulse {
       0%, 100% {
-        text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+        text-shadow: var(--glow-1);
         filter: brightness(1);
       }
       50% {
-        text-shadow: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
-        filter: brightness(1.1);
+        text-shadow: var(--glow-2);
+        filter: brightness(var(--glow-bright));
       }
     }
 
@@ -176,16 +176,16 @@
       0% {
         opacity: 0.5;
         transform: scale(0.92);
-        text-shadow: 0 0 0 rgba(218, 165, 32, 0);
+        text-shadow: 0 0 0 transparent;
       }
       60% {
         transform: scale(1.05);
-        text-shadow: 0 0 35px rgba(218, 165, 32, 0.9);
+        text-shadow: var(--reveal-peak);
       }
       100% {
         opacity: 1;
         transform: scale(1);
-        text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
+        text-shadow: var(--glow-1);
       }
     }
 
@@ -204,48 +204,27 @@
     
     .word-en.lit {
       color: #fff;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      animation: glowPulseEn 2.5s ease-in-out infinite;
+      --glow-1: 0 0 15px rgba(255, 255, 255, 0.5);
+      --glow-2: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
+      --glow-bright: 1.1;
+      text-shadow: var(--glow-1);
+      animation: glowPulse 2.5s ease-in-out infinite;
     }
 
     .word-en.lit-stagger {
       color: #fff;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      animation: wordRevealEn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                 glowPulseEn 2.5s ease-in-out 0.4s infinite;
+      --glow-1: 0 0 15px rgba(255, 255, 255, 0.5);
+      --glow-2: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
+      --glow-bright: 1.1;
+      --reveal-peak: 0 0 25px rgba(255, 255, 255, 0.8);
+      text-shadow: var(--glow-1);
+      animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 glowPulse 2.5s ease-in-out 0.4s infinite;
     }
 
     .word-en.touch-active {
       transform: scale(0.95);
       transition: transform 0.1s ease-out;
-    }
-
-    @keyframes glowPulseEn {
-      0%, 100% {
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        filter: brightness(1);
-      }
-      50% {
-        text-shadow: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
-        filter: brightness(1.1);
-      }
-    }
-
-    @keyframes wordRevealEn {
-      0% {
-        opacity: 0.4;
-        transform: scale(0.94);
-        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
-      }
-      60% {
-        transform: scale(1.04);
-        text-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      }
     }
 
     /* ===== PLACEHOLDER ===== */
@@ -887,7 +866,8 @@
       }
     }
 
-    function findWordElementAtPoint(x, y, container) {
+    // Unified hit detection - finds word element at point with padding for touch
+    function findWordAtPoint(x, y, container) {
       for (const word of container.querySelectorAll('[data-link]')) {
         const r = word.getBoundingClientRect();
         if (x >= r.left - 8 && x <= r.right + 8 && y >= r.top - 8 && y <= r.bottom + 8) {
@@ -953,24 +933,27 @@
         touchFeedbackEl = null;
       }
     }
-    
-    function findWordAtPoint(x, y, container) {
-      for (const word of container.querySelectorAll('[data-link]')) {
-        const r = word.getBoundingClientRect();
-        if (x >= r.left - 8 && x <= r.right + 8 && y >= r.top - 8 && y <= r.bottom + 8) {
-          return word.dataset.link;
-        }
+
+    // Unified word interaction handler - reduces duplication across verses and qohelet
+    function handleWordInteraction(wordEl, linkValue, e, isTouch = false) {
+      if (isTouch) {
+        e.preventDefault();
+        addTouchFeedback(wordEl);
       }
-      return null;
+      const wasVisible = tooltipVisible && activeWord === wordEl;
+      if (!wasVisible) {
+        lightUp(linkValue, true);
+      }
+      toggleTooltip(wordEl, linkValue, e);
     }
-    
+
     function setupHitDetection() {
       verses.forEach(({ el: c }) => {
         // Desktop hover highlighting
         c.addEventListener('mousemove', e => {
           if (tooltipVisible) return; // Don't change highlights while tooltip is shown
-          const link = findWordAtPoint(e.clientX, e.clientY, c);
-          if (link) lightUp(link, false); // No stagger for hover
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) lightUp(result.link, false); // No stagger for hover
         });
         c.addEventListener('mouseleave', () => {
           if (!tooltipVisible) clearLit();
@@ -978,67 +961,32 @@
 
         // Desktop click for tooltip
         c.addEventListener('click', e => {
-          const result = findWordElementAtPoint(e.clientX, e.clientY, c);
-          if (result) {
-            const wasVisible = tooltipVisible && activeWord === result.el;
-            toggleTooltip(result.el, result.link, e);
-            // Stagger highlight animation when opening tooltip
-            if (!wasVisible) {
-              lightUp(result.link, true);
-            }
-          }
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) handleWordInteraction(result.el, result.link, e);
         });
 
         // Mobile touch handling - prevent copy/paste, show tooltip on tap
         c.addEventListener('touchstart', e => {
           const t = e.touches[0];
-          const result = findWordElementAtPoint(t.clientX, t.clientY, c);
-          if (result) {
-            // Prevent the default which triggers text selection
-            e.preventDefault();
-            // Add touch feedback
-            addTouchFeedback(result.el);
-            const wasVisible = tooltipVisible && activeWord === result.el;
-            // Stagger highlight animation when opening tooltip
-            if (!wasVisible) {
-              lightUp(result.link, true);
-            }
-            toggleTooltip(result.el, result.link, e);
-          }
-        }, { passive: false }); // passive: false to allow preventDefault
+          const result = findWordAtPoint(t.clientX, t.clientY, c);
+          if (result) handleWordInteraction(result.el, result.link, e, true);
+        }, { passive: false });
 
         c.addEventListener('touchend', () => {
           removeTouchFeedback();
         }, { passive: true });
       });
 
-      // Qohelet (floating title) handling
+      // Qohelet (floating title) handling - uses same interaction pattern as verses
       qohelet.addEventListener('mouseenter', () => {
         if (!tooltipVisible) lightUp('teacher', false);
       });
       qohelet.addEventListener('mouseleave', () => {
         if (!tooltipVisible) clearLit();
       });
-      qohelet.addEventListener('click', e => {
-        const wasVisible = tooltipVisible && activeWord === qohelet;
-        toggleTooltip(qohelet, 'teacher', e);
-        if (!wasVisible) {
-          lightUp('teacher', true);
-        }
-      });
-      qohelet.addEventListener('touchstart', e => {
-        e.preventDefault();
-        addTouchFeedback(qohelet);
-        const wasVisible = tooltipVisible && activeWord === qohelet;
-        if (!wasVisible) {
-          lightUp('teacher', true);
-        }
-        toggleTooltip(qohelet, 'teacher', e);
-      }, { passive: false });
-
-      qohelet.addEventListener('touchend', () => {
-        removeTouchFeedback();
-      }, { passive: true });
+      qohelet.addEventListener('click', e => handleWordInteraction(qohelet, 'teacher', e));
+      qohelet.addEventListener('touchstart', e => handleWordInteraction(qohelet, 'teacher', e, true), { passive: false });
+      qohelet.addEventListener('touchend', removeTouchFeedback, { passive: true });
 
       // Hide tooltip and clear highlights when tapping outside
       document.addEventListener('touchstart', e => {
@@ -1138,10 +1086,9 @@
     }
 
     // ===== STATE =====
-    // Anchors: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
+    // Anchors are sequential integers: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
     const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
     const MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
-    const ANCHORS = Array.from({ length: MAX + 1 }, (_, i) => i);
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -1284,28 +1231,19 @@
     }
     
     function getState(p) {
-      // Clamp
+      // Clamp to valid range
       p = Math.max(0, Math.min(MAX, p));
-      
-      // Check if at anchor (use exact state)
-      for (const a of ANCHORS) {
-        if (Math.abs(p - a) < SNAP_THRESHOLD) {
-          return getAnchorState(a);
-        }
+
+      // Check if at anchor (use exact state) - anchors are integers, so check proximity
+      const nearestAnchor = Math.round(p);
+      if (Math.abs(p - nearestAnchor) < SNAP_THRESHOLD) {
+        return getAnchorState(nearestAnchor);
       }
-      
-      // Find which segment we're in
-      let lower = 0, upper = MAX;
-      for (let i = 0; i < ANCHORS.length - 1; i++) {
-        if (p >= ANCHORS[i] && p <= ANCHORS[i + 1]) {
-          lower = ANCHORS[i];
-          upper = ANCHORS[i + 1];
-          break;
-        }
-      }
-      
-      // Interpolate
-      const t = (p - lower) / (upper - lower);
+
+      // Interpolate between floor and ceiling anchors
+      const lower = Math.floor(p);
+      const upper = Math.ceil(p);
+      const t = p - lower;
       return lerpState(getAnchorState(lower), getAnchorState(upper), t);
     }
 
@@ -1418,22 +1356,19 @@
     }
     
     // ===== INPUT =====
+    // Navigation uses simple arithmetic since anchors are sequential integers 0..MAX
     function snap() {
-      let best = ANCHORS[0], bestD = Infinity;
-      for (const a of ANCHORS) {
-        const d = Math.abs(timeline.target - a);
-        if (d < bestD) { bestD = d; best = a; }
-      }
-      timeline.set(best);
+      timeline.set(Math.round(timeline.target));
     }
-    
+
     function next() {
-      for (const a of ANCHORS) if (a > timeline.target + 0.05) { timeline.set(a); return; }
+      const nextAnchor = Math.floor(timeline.target + 0.95);
+      if (nextAnchor <= MAX) timeline.set(nextAnchor);
     }
-    
+
     function prev() {
-      for (let i = ANCHORS.length - 1; i >= 0; i--)
-        if (ANCHORS[i] < timeline.target - 0.05) { timeline.set(ANCHORS[i]); return; }
+      const prevAnchor = Math.ceil(timeline.target - 0.95);
+      if (prevAnchor >= 0) timeline.set(prevAnchor);
     }
     
     let keyHeld = false, keyTimer = null;
