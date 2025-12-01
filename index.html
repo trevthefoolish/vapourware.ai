@@ -1009,16 +1009,16 @@
           if (result) handleWordInteraction(result.el, result.link, e);
         });
 
-        // Mobile touch handling - prevent copy/paste, show tooltip on tap
+        // Mobile touch handling - defer tap until touchend to distinguish from swipe
         c.addEventListener('touchstart', e => {
           const t = e.touches[0];
           const result = findWordAtPoint(t.clientX, t.clientY, c);
-          if (result) handleWordInteraction(result.el, result.link, e, true);
+          if (result) {
+            e.preventDefault();
+            touch.pendingTap = { el: result.el, link: result.link };
+            addTouchFeedback(result.el);
+          }
         }, { passive: false });
-
-        c.addEventListener('touchend', () => {
-          removeTouchFeedback();
-        }, { passive: true });
       });
 
       // Qohelet (floating title) handling - uses same interaction pattern as verses
@@ -1029,8 +1029,11 @@
         if (!tooltipVisible) clearLit();
       });
       qohelet.addEventListener('click', e => handleWordInteraction(qohelet, 'teacher', e));
-      qohelet.addEventListener('touchstart', e => handleWordInteraction(qohelet, 'teacher', e, true), { passive: false });
-      qohelet.addEventListener('touchend', removeTouchFeedback, { passive: true });
+      qohelet.addEventListener('touchstart', e => {
+        e.preventDefault();
+        touch.pendingTap = { el: qohelet, link: 'teacher' };
+        addTouchFeedback(qohelet);
+      }, { passive: false });
 
       // Hide tooltip and clear highlights when tapping outside
       document.addEventListener('touchstart', e => {
@@ -1050,7 +1053,6 @@
 
       // Clear highlights on touchend (but keep tooltip if visible)
       document.addEventListener('touchend', () => {
-        removeTouchFeedback();
         if (!tooltipVisible) {
           setTimeout(clearLit, 150);
         }
@@ -1503,7 +1505,7 @@
       }
     });
     
-    let touch = { y: 0, scrolling: false };
+    let touch = { y: 0, scrolling: false, pendingTap: null };
 
     document.addEventListener('touchstart', e => {
       touch.y = e.touches[0].clientY;
@@ -1514,6 +1516,11 @@
       const dy = e.touches[0].clientY - touch.y;
       if (Math.abs(dy) > 8) {
         touch.scrolling = true;
+        // Cancel pending tap - this is a swipe, not a tap
+        if (touch.pendingTap) {
+          removeTouchFeedback();
+          touch.pendingTap = null;
+        }
         // Hide tooltip on scroll
         if (tooltipVisible) {
           hideTooltip();
@@ -1529,6 +1536,18 @@
     }, { passive: true });
 
     document.addEventListener('touchend', () => {
+      // Complete pending tap if it wasn't cancelled by swipe
+      if (touch.pendingTap && !touch.scrolling) {
+        const { el, link } = touch.pendingTap;
+        const wasVisible = tooltipVisible && activeWord === el;
+        if (!wasVisible) {
+          lightUp(link, true);
+        }
+        toggleTooltip(el, link);
+      }
+      touch.pendingTap = null;
+      removeTouchFeedback();
+
       if (touch.scrolling) snap();
     });
     
