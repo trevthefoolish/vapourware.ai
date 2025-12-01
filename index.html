@@ -662,6 +662,268 @@
 
 
   <script>
+    // ===== AI VERSE SERVICE =====
+    // Fetches next verses on demand via backend proxy to Claude API
+    const VerseAI = {
+      // Use local dev server or production endpoint
+      proxyUrl: window.location.hostname === 'localhost'
+        ? 'http://localhost:3001/api/verse'
+        : '/api/verse',
+      loading: false,
+      nextVerseNum: 5,  // Next verse to fetch (1:5, 1:6, etc.)
+      chapter: 1,
+      maxVerse: 18,  // Ecclesiastes chapter 1 has 18 verses
+
+      // Generate the prompt for Claude to create verse data
+      buildPrompt(verseRef) {
+        return `You are a biblical Hebrew scholar. Generate verse data for Ecclesiastes ${verseRef} in JSON format.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "reference": "${verseRef}",
+  "hebrew": {
+    "words": [
+      { "text": "הֶבֶל", "link": "uniqueKey" }
+    ]
+  },
+  "english": {
+    "text": "The English translation with <link> tags",
+    "linkedText": "A <span class='word-en' data-link='uniqueKey'>generation</span> goes..."
+  },
+  "wordData": {
+    "uniqueKey": {
+      "hebrew": "הֶבֶל",
+      "transliteration": "he·vel",
+      "tidbit": "Etymology and meaning explanation (2-3 sentences)"
+    }
+  }
+}
+
+Requirements:
+- Use the Masoretic Hebrew text with vowel points (nikkud)
+- Provide scholarly word-by-word data with etymological insights
+- Link related Hebrew and English words using matching "link" keys
+- The "linkedText" should wrap key English words in spans with data-link attributes
+- Tidbits should be contemplative and scholarly, matching the meditative tone
+- Focus on 4-6 key words per verse for the wordData`;
+      },
+
+      // Call the backend proxy
+      async fetchVerse(verseRef) {
+        if (this.loading) return null;
+        this.loading = true;
+
+        try {
+          const response = await fetch(this.proxyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: this.buildPrompt(verseRef),
+              verseRef
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          this.loading = false;
+          return data;
+        } catch (err) {
+          console.error('VerseAI fetch error:', err);
+          this.loading = false;
+          return null;
+        }
+      },
+
+      // Get the next verse reference
+      getNextRef() {
+        if (this.nextVerseNum > this.maxVerse) {
+          return null;  // No more verses in this chapter
+        }
+        return `${this.chapter}:${this.nextVerseNum}`;
+      },
+
+      // Fetch and return the next verse
+      async loadNextVerse() {
+        const ref = this.getNextRef();
+        if (!ref) return null;
+
+        const verseData = await this.fetchVerse(ref);
+        if (verseData) {
+          this.nextVerseNum++;
+        }
+        return verseData;
+      }
+    };
+
+    // ===== VERSE FACTORY =====
+    // Converts AI-generated verse data into DOM elements
+    const VerseFactory = {
+      // Create a verse DOM element from AI data
+      createVerseElement(verseData, verseIndex) {
+        const verse = document.createElement('div');
+        verse.className = 'verse';
+        verse.id = `verse${verseIndex}`;
+
+        // Hebrew container
+        const hebrewDiv = document.createElement('div');
+        hebrewDiv.className = 'verse-he';
+
+        verseData.hebrew.words.forEach(word => {
+          const span = document.createElement('span');
+          span.className = 'word-he';
+          span.dataset.link = word.link;
+          span.textContent = word.text;
+          hebrewDiv.appendChild(span);
+        });
+
+        // English container
+        const englishDiv = document.createElement('div');
+        englishDiv.className = 'verse-en';
+        englishDiv.id = `verse${verseIndex}En`;
+        englishDiv.innerHTML = verseData.english.linkedText;
+
+        verse.appendChild(hebrewDiv);
+        verse.appendChild(englishDiv);
+
+        return verse;
+      },
+
+      // Merge new word data into the global wordData object
+      mergeWordData(newWordData) {
+        Object.assign(wordData, newWordData);
+      }
+    };
+
+    // ===== DYNAMIC VERSE LOADER =====
+    // Integrates AI verses into the navigation system
+    const VerseLoader = {
+      scene: null,
+      loadingIndicator: null,
+      loadThreshold: 0.7,  // Start loading when 70% through current last verse
+
+      init() {
+        this.scene = document.querySelector('.scene');
+        this.createLoadingIndicator();
+      },
+
+      createLoadingIndicator() {
+        this.loadingIndicator = document.createElement('div');
+        this.loadingIndicator.className = 'verse-loading';
+        this.loadingIndicator.innerHTML = '<span class="loading-text">Loading verse...</span>';
+        this.loadingIndicator.style.cssText = `
+          position: fixed;
+          bottom: 60px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: var(--gold);
+          font-size: 14px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          pointer-events: none;
+        `;
+        document.body.appendChild(this.loadingIndicator);
+      },
+
+      showLoading() {
+        this.loadingIndicator.style.opacity = '1';
+      },
+
+      hideLoading() {
+        this.loadingIndicator.style.opacity = '0';
+      },
+
+      // Check if we should load the next verse
+      shouldLoadNext(timelinePosition) {
+        const currentMax = INTRO_ANCHORS + VERSE_COUNT - 1;
+        const distanceToEnd = currentMax - timelinePosition;
+        return distanceToEnd < this.loadThreshold && !VerseAI.loading && VerseAI.getNextRef();
+      },
+
+      // Load and integrate a new verse
+      async loadNext() {
+        if (VerseAI.loading || !VerseAI.getNextRef()) return false;
+
+        this.showLoading();
+
+        const verseData = await VerseAI.loadNextVerse();
+        if (!verseData) {
+          this.hideLoading();
+          return false;
+        }
+
+        // Create and append new verse element
+        const newVerseIndex = verses.length + 1;
+        const verseEl = VerseFactory.createVerseElement(verseData, newVerseIndex);
+        this.scene.appendChild(verseEl);
+
+        // Merge word data
+        VerseFactory.mergeWordData(verseData.wordData);
+
+        // Update verses array
+        verses.push({
+          el: verseEl,
+          en: verseEl.querySelector('.verse-en'),
+          words: [...verseEl.querySelectorAll('.word-he')],
+          ref: verseData.reference
+        });
+
+        // Update global constants
+        updateVerseCount();
+
+        // Rebuild verse selector
+        buildVerseSelector();
+
+        // Re-setup hit detection for new verse
+        this.setupNewVerseInteraction(verses[verses.length - 1]);
+
+        // Remeasure positions
+        measure();
+
+        this.hideLoading();
+        return true;
+      },
+
+      // Setup interaction handlers for a newly added verse
+      setupNewVerseInteraction(verse) {
+        const c = verse.el;
+
+        c.addEventListener('mousemove', e => {
+          if (tooltipVisible) return;
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) lightUp(result.link, false);
+        });
+
+        c.addEventListener('mouseleave', () => {
+          if (!tooltipVisible) clearLit();
+        });
+
+        c.addEventListener('click', e => {
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) handleWordInteraction(result.el, result.link, e);
+        });
+
+        c.addEventListener('touchstart', e => {
+          const t = e.touches[0];
+          const result = findWordAtPoint(t.clientX, t.clientY, c);
+          if (result) {
+            e.preventDefault();
+            touch.pendingTap = { el: result.el, link: result.link };
+            addTouchFeedback(result.el);
+          }
+        }, { passive: false });
+      }
+    };
+
+    // Update verse count and MAX when new verses are added
+    function updateVerseCount() {
+      // VERSE_COUNT and MAX are recalculated
+      window.VERSE_COUNT = verses.length;
+      window.MAX = INTRO_ANCHORS + verses.length - 1;
+    }
+
     // ===== ELEMENTS =====
     const $ = id => document.getElementById(id);
     const titleEn = $('titleEn');
@@ -679,7 +941,7 @@
       words: [...el.querySelectorAll('.word-he')],
       ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
     }));
-    const VERSE_COUNT = verses.length;
+    let VERSE_COUNT = verses.length;
 
     const wordTooltip = $('wordTooltip');
     const tooltipHebrew = $('tooltipHebrew');
@@ -1187,7 +1449,7 @@
     // ===== STATE =====
     // Anchors are sequential integers: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
     const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
-    const MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
+    let MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -1403,6 +1665,11 @@
       // Update navigation hints
       updateHints(p);
 
+      // Auto-load next verse when approaching the end
+      if (VerseLoader.shouldLoadNext(p)) {
+        VerseLoader.loadNext();
+      }
+
       requestAnimationFrame(render);
     }
 
@@ -1571,6 +1838,7 @@
       measure();
       setupHitDetection();
       buildVerseSelector();
+      VerseLoader.init();  // Initialize the dynamic verse loader
       startTime = Date.now();
 
       timeline.snap(0);

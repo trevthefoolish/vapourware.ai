@@ -1,0 +1,20 @@
+{
+  "name": "vapourware-verse-api",
+  "version": "1.0.0",
+  "description": "Backend proxy for Claude API verse generation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "ecclesiastes",
+    "claude",
+    "api",
+    "verse"
+  ],
+  "license": "MIT"
+}
