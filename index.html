@@ -1566,6 +1566,17 @@
       wheelTimer = setTimeout(snap, 100);
     }, { passive: false });
     
+    // ===== COOKIES =====
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    function setCookie(name, value, days = 365) {
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
     // ===== INIT =====
     function init() {
       measure();
@@ -1573,10 +1584,18 @@
       buildVerseSelector();
       startTime = Date.now();
 
-      timeline.snap(0);
+      // First visit → title (anchor 0), return visit → closer (last verse)
+      const hasVisited = getCookie('visited');
+      const startAnchor = hasVisited ? MAX : 0;
+      timeline.snap(startAnchor);
+
+      // Mark as visited for next time
+      if (!hasVisited) {
+        setCookie('visited', 'true');
+      }
 
       // Apply initial state
-      const s = getAnchorState(0);
+      const s = getAnchorState(startAnchor);
       titleEn.style.opacity = s.en.opacity;
       qohelet.style.opacity = s.q.opacity;
 
