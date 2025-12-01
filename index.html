@@ -541,58 +541,9 @@
   </style>
 </head>
 <body>
-  <div class="scene">
+  <div class="scene" id="scene">
     <div class="title-en" id="titleEn">Ecclesiastes</div>
-    
-    <div class="verse" id="verse1">
-      <div class="verse-he">
-        <span class="word-he" data-link="words">דִּבְרֵי</span>
-        <span class="placeholder" id="ph1">קֹהֶלֶת</span>
-        <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
-        <span class="word-he" data-link="king">מֶלֶךְ</span>
-        <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
-      </div>
-      <div class="verse-en" id="verse1En">The <span class="word-en" data-link="words">words</span> of the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="son">son of David</span>, <span class="word-en" data-link="king">king</span> in <span class="word-en" data-link="jerusalem">Jerusalem</span></div>
-    </div>
-    
-    <div class="verse" id="verse2">
-      <div class="verse-he">
-        <span class="word-he" data-link="vanity">הֲבֵל</span>
-        <span class="word-he" data-link="vanity">הֲבָלִים</span>
-        <span class="word-he" data-link="says">אָמַר</span>
-        <span class="placeholder" id="ph2">קֹהֶלֶת</span>
-        <span class="word-he" data-link="vanity">הֲבֵל</span>
-        <span class="word-he" data-link="vanity">הֲבָלִים</span>
-        <span class="word-he" data-link="all">הַכֹּל</span>
-        <span class="word-he" data-link="vanity">הָבֶל</span>
-      </div>
-      <div class="verse-en" id="verse2En"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
-    </div>
-
-    <div class="verse" id="verse3">
-      <div class="verse-he">
-        <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
-        <span class="word-he" data-link="man">לָאָדָם</span>
-        <span class="word-he" data-link="labor">בְּכָל־עֲמָלוֹ</span>
-        <span class="word-he" data-link="toils">שֶׁיַּעֲמֹל</span>
-        <span class="word-he" data-link="under">תַּחַת</span>
-        <span class="word-he" data-link="sun">הַשָּׁמֶשׁ</span>
-      </div>
-      <div class="verse-en" id="verse3En">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
-    </div>
-
-    <div class="verse" id="verse4">
-      <div class="verse-he">
-        <span class="word-he" data-link="generation">דּוֹר</span>
-        <span class="word-he" data-link="goes">הֹלֵךְ</span>
-        <span class="word-he" data-link="generation">וְדוֹר</span>
-        <span class="word-he" data-link="comes">בָּא</span>
-        <span class="word-he" data-link="earth">וְהָאָרֶץ</span>
-        <span class="word-he" data-link="forever">לְעוֹלָם</span>
-        <span class="word-he" data-link="remains">עֹמָדֶת</span>
-      </div>
-      <div class="verse-en" id="verse4En">A <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="goes">goes</span>, and a <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="comes">comes</span>, but the <span class="word-en" data-link="earth">earth</span> <span class="word-en" data-link="remains">remains</span> <span class="word-en" data-link="forever">forever</span>.</div>
-    </div>
+    <!-- Verses rendered dynamically from data/ecclesiastes.json -->
   </div>
   
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
@@ -620,23 +571,11 @@
   <script>
     // ===== ELEMENTS =====
     const $ = id => document.getElementById(id);
+    const scene = $('scene');
     const titleEn = $('titleEn');
     const qohelet = $('qohelet');
-    const ph1 = $('ph1');
-    const ph2 = $('ph2');
     const progress = $('progress');
     const verseNum = $('verseNum');
-
-    // ===== DYNAMIC VERSE DISCOVERY =====
-    // Automatically finds all verse elements in the DOM
-    const verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
-      el,
-      en: el.querySelector('.verse-en'),
-      words: [...el.querySelectorAll('.word-he')],
-      ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
-    }));
-    const VERSE_COUNT = verses.length;
-
     const wordTooltip = $('wordTooltip');
     const tooltipHebrew = $('tooltipHebrew');
     const tooltipTransliteration = $('tooltipTransliteration');
@@ -644,110 +583,135 @@
     const scrollHint = $('scrollHint');
     const tapHint = $('tapHint');
 
-    // ===== WORD DATA =====
-    // Transliterations and contextual tidbits for each Hebrew word
-    const wordData = {
-      'words': {
-        hebrew: 'דִּבְרֵי',
-        transliteration: 'div·rei',
-        tidbit: 'The construct form of "devarim" (words/things). In Hebrew, words and things share the same root — speech has substance, creating reality.'
-      },
-      'teacher': {
-        hebrew: 'קֹהֶלֶת',
-        transliteration: 'qo·he·let',
-        tidbit: 'From "qahal" (assembly). One who gathers people to teach. Traditionally identified as Solomon in his old age, reflecting on life\'s meaning.'
-      },
-      'son': {
-        hebrew: 'בֶּן־דָּוִד',
-        transliteration: 'ben-da·vid',
-        tidbit: 'Son of David — a title claiming royal Davidic lineage. The hyphen (maqef) binds the words as one concept: a unified identity.'
-      },
-      'king': {
-        hebrew: 'מֶלֶךְ',
-        transliteration: 'me·lekh',
-        tidbit: 'King — from a root meaning "to counsel." The king wasn\'t merely a ruler but an advisor to the nation, responsible for wisdom and justice.'
-      },
-      'jerusalem': {
-        hebrew: 'בִּירוּשָׁלָֽםִ',
-        transliteration: 'bi·ru·sha·la·yim',
-        tidbit: 'In Jerusalem — literally "foundation of peace" (or "teaching of peace"). The city where heaven and earth meet, seat of wisdom and worship.'
-      },
-      'vanity': {
-        hebrew: 'הֶבֶל',
-        transliteration: 'he·vel',
-        tidbit: 'Often translated "vanity" but literally means breath, vapor, or mist. Something that appears and quickly vanishes — not worthless, but fleeting and ungraspable.'
-      },
-      'says': {
-        hebrew: 'אָמַר',
-        transliteration: 'a·mar',
-        tidbit: 'He said — the basic Hebrew word for speech. Its placement here gives Qohelet\'s words prophetic weight, like "thus says the LORD."'
-      },
-      'all': {
-        hebrew: 'הַכֹּל',
-        transliteration: 'ha·kol',
-        tidbit: 'The all, everything — with the definite article. Not just "everything" but THE everything: the totality of human experience under the sun.'
-      },
-      'gain': {
-        hebrew: 'מַה־יִּתְרוֹן',
-        transliteration: 'mah-yit·ron',
-        tidbit: 'What profit/advantage? "Yitron" appears only in Ecclesiastes — a commercial term asking what remains after all costs are counted.'
-      },
-      'man': {
-        hebrew: 'לָאָדָם',
-        transliteration: "la·a·dam",
-        tidbit: 'To/for the human — "adam" connects to "adamah" (earth/ground). Humanity is earthbound, made from dust and returning to it.'
-      },
-      'labor': {
-        hebrew: 'בְּכָל־עֲמָלוֹ',
-        transliteration: "be·khol-a·ma·lo",
-        tidbit: 'In all his toil — "amal" implies wearisome, exhausting labor. Not just work, but the grinding effort that wears down body and soul.'
-      },
-      'toils': {
-        hebrew: 'שֶׁיַּעֲמֹל',
-        transliteration: "she·ya·a·mol",
-        tidbit: 'That he toils — the same root as "amal" intensified. The repetition emphasizes life\'s endless cycle of effort upon effort.'
-      },
-      'under': {
-        hebrew: 'תַּחַת',
-        transliteration: 'ta·chat',
-        tidbit: 'Under/beneath — establishes a boundary. Everything "under the sun" is earthly, temporal. What lies above remains a mystery.'
-      },
-      'sun': {
-        hebrew: 'הַשָּׁמֶשׁ',
-        transliteration: 'ha·sha·mesh',
-        tidbit: 'The sun — "under the sun" appears 29 times in Ecclesiastes. It defines the book\'s scope: life as experienced in this visible world, under heaven\'s watchful eye.'
-      },
-      'generation': {
-        hebrew: 'דּוֹר',
-        transliteration: 'dor',
-        tidbit: 'Generation — from a root meaning "to circle" or "to dwell." Each generation inhabits its moment, then yields to the next in an endless cycle.'
-      },
-      'goes': {
-        hebrew: 'הֹלֵךְ',
-        transliteration: 'ho·lekh',
-        tidbit: 'Goes/walks away — the present participle of "halakh" (to walk). Life is movement toward departure; every generation is always already leaving.'
-      },
-      'comes': {
-        hebrew: 'בָּא',
-        transliteration: 'ba',
-        tidbit: 'Comes/arrives — the counterpart to "goes." While one generation departs, another enters. The stage is never empty, yet the actors always change.'
-      },
-      'earth': {
-        hebrew: 'וְהָאָרֶץ',
-        transliteration: 've·ha·a·retz',
-        tidbit: 'But the earth — "eretz" is the land, the ground, the world itself. Against human transience, it stands as silent witness to all comings and goings.'
-      },
-      'forever': {
-        hebrew: 'לְעוֹלָם',
-        transliteration: 'le·o·lam',
-        tidbit: 'Forever — "olam" means hidden time, eternity, or age. The earth endures into time beyond human reckoning, a permanence we can name but never know.'
-      },
-      'remains': {
-        hebrew: 'עֹמָדֶת',
-        transliteration: 'o·me·det',
-        tidbit: 'Stands/remains — from "amad" (to stand firm). While generations flow like water, the earth stands like a rock. The verb suggests quiet, steadfast presence.'
+    // ===== DATA (loaded from JSON) =====
+    let scriptureData = null;
+    let wordData = {};
+    let verses = [];
+    let VERSE_COUNT = 0;
+
+    // Placeholder references (dynamically discovered after render)
+    let ph1 = null;
+    let ph2 = null;
+
+    // ===== DATA LOADING =====
+    async function loadScriptureData() {
+      try {
+        const response = await fetch('data/ecclesiastes.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        scriptureData = await response.json();
+        wordData = scriptureData.lexicon;
+        validateData();
+        renderVerses();
+        return true;
+      } catch (err) {
+        console.error('Failed to load scripture data:', err);
+        // Fallback: show error state
+        scene.innerHTML += '<div style="color:#daa520;text-align:center;padding:2em;">Failed to load scripture data</div>';
+        return false;
       }
-    };
+    }
+
+    // ===== VALIDATION =====
+    function validateData() {
+      const warnings = [];
+      const usedLinks = new Set();
+
+      // Collect all links used in verses
+      scriptureData.verses.forEach((verse, vi) => {
+        verse.hebrew.forEach(word => {
+          usedLinks.add(word.link);
+          if (!wordData[word.link]) {
+            warnings.push(`Verse ${verse.number}: Hebrew word "${word.text}" uses undefined link "${word.link}"`);
+          }
+        });
+
+        // Parse English template for links
+        const linkMatches = verse.english.match(/\{([^}:]+)(?::[^}]*)?\}/g) || [];
+        linkMatches.forEach(match => {
+          const link = match.match(/\{([^}:]+)/)[1];
+          usedLinks.add(link);
+          if (!wordData[link]) {
+            warnings.push(`Verse ${verse.number}: English uses undefined link "${link}"`);
+          }
+        });
+      });
+
+      // Check for unused lexicon entries
+      Object.keys(wordData).forEach(link => {
+        if (!usedLinks.has(link)) {
+          warnings.push(`Lexicon entry "${link}" is never used`);
+        }
+      });
+
+      if (warnings.length > 0) {
+        console.warn('Scripture data validation warnings:', warnings);
+      }
+    }
+
+    // ===== VERSE RENDERING =====
+    function parseEnglishTemplate(template) {
+      // Parse "{link:display}" or "{link}" patterns
+      // Returns HTML with <span class="word-en" data-link="...">display</span>
+      return template.replace(/\{([^}:]+)(?::([^}]*))?\}/g, (match, link, display) => {
+        const text = display || link;
+        return `<span class="word-en" data-link="${link}">${text}</span>`;
+      });
+    }
+
+    function renderVerses() {
+      let placeholderIndex = 0;
+
+      scriptureData.verses.forEach((verseData, index) => {
+        const verseEl = document.createElement('div');
+        verseEl.className = 'verse';
+        verseEl.id = `verse${index + 1}`;
+
+        // Hebrew line
+        const hebrewEl = document.createElement('div');
+        hebrewEl.className = 'verse-he';
+
+        verseData.hebrew.forEach(word => {
+          const span = document.createElement('span');
+          if (word.placeholder) {
+            placeholderIndex++;
+            span.className = 'placeholder';
+            span.id = `ph${placeholderIndex}`;
+            span.textContent = word.text;
+          } else {
+            span.className = 'word-he';
+            span.dataset.link = word.link;
+            span.textContent = word.text;
+          }
+          hebrewEl.appendChild(span);
+        });
+
+        // English line
+        const englishEl = document.createElement('div');
+        englishEl.className = 'verse-en';
+        englishEl.id = `verse${index + 1}En`;
+        englishEl.innerHTML = parseEnglishTemplate(verseData.english);
+
+        verseEl.appendChild(hebrewEl);
+        verseEl.appendChild(englishEl);
+        scene.appendChild(verseEl);
+      });
+
+      // Update placeholder references
+      ph1 = $('ph1');
+      ph2 = $('ph2');
+
+      // Build verses array for animation system
+      verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
+        el,
+        en: el.querySelector('.verse-en'),
+        words: [...el.querySelectorAll('.word-he')],
+        ref: `${scriptureData.chapter}:${scriptureData.verses[i].number}`
+      }));
+      VERSE_COUNT = verses.length;
+
+      // Update title from data
+      titleEn.textContent = scriptureData.book;
+    }
 
     // ===== TOOLTIP =====
     let tooltipVisible = false;
@@ -1440,7 +1404,11 @@
     }, { passive: false });
     
     // ===== INIT =====
-    function init() {
+    async function init() {
+      // Load scripture data first
+      const loaded = await loadScriptureData();
+      if (!loaded) return;
+
       measure();
       setupHitDetection();
       startTime = Date.now();
@@ -1459,7 +1427,7 @@
 
       requestAnimationFrame(render);
     }
-    
+
     document.fonts.ready.then(init);
     window.addEventListener('resize', () => setTimeout(measure, 100));
   </script>
