@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ecclesiastes 1:1-3</title>
+  <title>Ecclesiastes 1:1-4</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -601,6 +601,19 @@
       </div>
       <div class="verse-en" id="verse3En">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
     </div>
+
+    <div class="verse" id="verse4">
+      <div class="verse-he">
+        <span class="word-he" data-link="generation">דּוֹר</span>
+        <span class="word-he" data-link="goes">הֹלֵךְ</span>
+        <span class="word-he" data-link="generation">וְדוֹר</span>
+        <span class="word-he" data-link="comes">בָּא</span>
+        <span class="word-he" data-link="earth">וְהָאָרֶץ</span>
+        <span class="word-he" data-link="forever">לְעוֹלָם</span>
+        <span class="word-he" data-link="remains">עֹמָדֶת</span>
+      </div>
+      <div class="verse-en" id="verse4En">A <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="goes">goes</span>, and a <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="comes">comes</span>, but the <span class="word-en" data-link="earth">earth</span> <span class="word-en" data-link="remains">remains</span> <span class="word-en" data-link="forever">forever</span>.</div>
+    </div>
   </div>
   
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
@@ -633,9 +646,11 @@
     const verse1 = $('verse1');
     const verse2 = $('verse2');
     const verse3 = $('verse3');
+    const verse4 = $('verse4');
     const verse1En = $('verse1En');
     const verse2En = $('verse2En');
     const verse3En = $('verse3En');
+    const verse4En = $('verse4En');
     const ph1 = $('ph1');
     const ph2 = $('ph2');
     const progress = $('progress');
@@ -644,6 +659,7 @@
     const v1Words = [...verse1.querySelectorAll('.word-he')];
     const v2Words = [...verse2.querySelectorAll('.word-he')];
     const v3Words = [...verse3.querySelectorAll('.word-he')];
+    const v4Words = [...verse4.querySelectorAll('.word-he')];
 
     const wordTooltip = $('wordTooltip');
     const tooltipHebrew = $('tooltipHebrew');
@@ -724,6 +740,36 @@
         hebrew: 'הַשָּׁמֶשׁ',
         transliteration: 'ha·sha·mesh',
         tidbit: 'The sun — "under the sun" appears 29 times in Ecclesiastes. It defines the book\'s scope: life as experienced in this visible world, under heaven\'s watchful eye.'
+      },
+      'generation': {
+        hebrew: 'דּוֹר',
+        transliteration: 'dor',
+        tidbit: 'Generation — from a root meaning "to circle" or "to dwell." Each generation inhabits its moment, then yields to the next in an endless cycle.'
+      },
+      'goes': {
+        hebrew: 'הֹלֵךְ',
+        transliteration: 'ho·lekh',
+        tidbit: 'Goes/walks away — the present participle of "halakh" (to walk). Life is movement toward departure; every generation is always already leaving.'
+      },
+      'comes': {
+        hebrew: 'בָּא',
+        transliteration: 'ba',
+        tidbit: 'Comes/arrives — the counterpart to "goes." While one generation departs, another enters. The stage is never empty, yet the actors always change.'
+      },
+      'earth': {
+        hebrew: 'וְהָאָרֶץ',
+        transliteration: 've·ha·a·retz',
+        tidbit: 'But the earth — "eretz" is the land, the ground, the world itself. Against human transience, it stands as silent witness to all comings and goings.'
+      },
+      'forever': {
+        hebrew: 'לְעוֹלָם',
+        transliteration: 'le·o·lam',
+        tidbit: 'Forever — "olam" means hidden time, eternity, or age. The earth endures into time beyond human reckoning, a permanence we can name but never know.'
+      },
+      'remains': {
+        hebrew: 'עֹמָדֶת',
+        transliteration: 'o·me·det',
+        tidbit: 'Stands/remains — from "amad" (to stand firm). While generations flow like water, the earth stands like a rock. The verb suggests quiet, steadfast presence.'
       }
     };
 
@@ -1092,8 +1138,8 @@
     }
 
     // ===== STATE =====
-    const MAX = 5;
-    const ANCHORS = [0, 1, 2, 3, 4, 5];
+    const MAX = 6;
+    const ANCHORS = [0, 1, 2, 3, 4, 5, 6];
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -1137,12 +1183,15 @@
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
           v3: { opacity: 0, y: 25 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
           v3Words: 0,
+          v4Words: 0,
           v1En: 0,
           v2En: 0,
           v3En: 0,
+          v4En: 0,
           verseNum: ''
         };
         case 1: return {
@@ -1151,12 +1200,15 @@
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
           v3: { opacity: 0, y: 25 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
           v3Words: 0,
+          v4Words: 0,
           v1En: 0,
           v2En: 0,
           v3En: 0,
+          v4En: 0,
           verseNum: ''
         };
         case 2: return {
@@ -1165,12 +1217,15 @@
           v1: { opacity: 0, y: 25 },
           v2: { opacity: 0, y: 25 },
           v3: { opacity: 0, y: 25 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
           v3Words: 0,
+          v4Words: 0,
           v1En: 0,
           v2En: 0,
           v3En: 0,
+          v4En: 0,
           verseNum: ''
         };
         case 3: return {
@@ -1179,12 +1234,15 @@
           v1: { opacity: 1, y: 0 },
           v2: { opacity: 0, y: 25 },
           v3: { opacity: 0, y: 25 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 1, // All visible
           v2Words: 0,
           v3Words: 0,
+          v4Words: 0,
           v1En: 1,
           v2En: 0,
           v3En: 0,
+          v4En: 0,
           verseNum: '1:1'
         };
         case 4: return {
@@ -1193,12 +1251,15 @@
           v1: { opacity: 0, y: -15 },
           v2: { opacity: 1, y: 0 },
           v3: { opacity: 0, y: 25 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 1, // All visible
           v3Words: 0,
+          v4Words: 0,
           v1En: 0,
           v2En: 1,
           v3En: 0,
+          v4En: 0,
           verseNum: '1:2'
         };
         case 5: return {
@@ -1207,13 +1268,33 @@
           v1: { opacity: 0, y: -15 },
           v2: { opacity: 0, y: -15 },
           v3: { opacity: 1, y: 0 },
+          v4: { opacity: 0, y: 25 },
           v1Words: 0,
           v2Words: 0,
           v3Words: 1, // All visible
+          v4Words: 0,
           v1En: 0,
           v2En: 0,
           v3En: 1,
+          v4En: 0,
           verseNum: '1:3'
+        };
+        case 6: return {
+          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
+          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 },
+          v1: { opacity: 0, y: -15 },
+          v2: { opacity: 0, y: -15 },
+          v3: { opacity: 0, y: -15 },
+          v4: { opacity: 1, y: 0 },
+          v1Words: 0,
+          v2Words: 0,
+          v3Words: 0,
+          v4Words: 1, // All visible
+          v1En: 0,
+          v2En: 0,
+          v3En: 0,
+          v4En: 1,
+          verseNum: '1:4'
         };
       }
     }
@@ -1249,12 +1330,18 @@
           opacity: lerp(s1.v3.opacity, s2.v3.opacity, e),
           y: lerp(s1.v3.y, s2.v3.y, e)
         },
+        v4: {
+          opacity: lerp(s1.v4.opacity, s2.v4.opacity, e),
+          y: lerp(s1.v4.y, s2.v4.y, e)
+        },
         v1Words: lerp(s1.v1Words, s2.v1Words, e),
         v2Words: lerp(s1.v2Words, s2.v2Words, e),
         v3Words: lerp(s1.v3Words, s2.v3Words, e),
+        v4Words: lerp(s1.v4Words, s2.v4Words, e),
         v1En: lerp(s1.v1En, s2.v1En, e),
         v2En: lerp(s1.v2En, s2.v2En, e),
         v3En: lerp(s1.v3En, s2.v3En, e),
+        v4En: lerp(s1.v4En, s2.v4En, e),
         verseNum: e > 0.5 ? s2.verseNum : s1.verseNum
       };
     }
@@ -1359,6 +1446,22 @@
 
       // V3 English
       verse3En.style.opacity = state.v3En;
+
+      // Verse 4
+      verse4.style.opacity = state.v4.opacity;
+      verse4.style.transform = `translateY(${state.v4.y}px)`;
+      verse4.style.pointerEvents = state.v4.opacity > 0.2 ? 'auto' : 'none';
+
+      // V4 words
+      v4Words.forEach((w, i) => {
+        const progress = state.v4Words * (v4Words.length + 1);
+        const wordT = Math.max(0, Math.min(1, progress - i));
+        w.style.opacity = wordT;
+        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+      });
+
+      // V4 English
+      verse4En.style.opacity = state.v4En;
 
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
