@@ -665,10 +665,10 @@
     // ===== AI VERSE SERVICE =====
     // Fetches next verses on demand via backend proxy to Claude API
     const VerseAI = {
-      // Use local dev server or production endpoint
-      proxyUrl: window.location.hostname === 'localhost'
-        ? 'http://localhost:3001/api/verse'
-        : '/api/verse',
+      // Use local dev server or Cloudflare Worker in production
+      proxyUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8787/api/verse'  // wrangler dev
+        : 'https://api.vapourware.ai/api/verse',  // Cloudflare Worker
       loading: false,
       nextVerseNum: 5,  // Next verse to fetch (1:5, 1:6, etc.)
       chapter: 1,
