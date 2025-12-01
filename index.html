@@ -250,10 +250,52 @@
       position: fixed;
       top: clamp(20px, 3vw, 40px);
       right: clamp(20px, 3vw, 40px);
+      display: flex;
+      align-items: center;
       font-size: clamp(14px, 2vw, 22px);
       color: rgba(245, 242, 235, 0.7);
       font-weight: 400;
       letter-spacing: 0.12em;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .verse-num-option {
+      padding: 8px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      overflow: hidden;
+      max-width: 0;
+      opacity: 0;
+      transition: max-width 0.3s ease, opacity 0.2s ease, padding 0.3s ease, color 0.15s ease, background 0.15s ease;
+    }
+
+    .verse-num-option.current {
+      max-width: 4em;
+      opacity: 1;
+      padding: 8px 10px;
+      color: rgba(245, 242, 235, 0.7);
+    }
+
+    .verse-num-option.current:hover {
+      background: rgba(218, 165, 32, 0.1);
+      color: var(--cream);
+    }
+
+    .verse-num.open .verse-num-option {
+      max-width: 4em;
+      opacity: 1;
+      padding: 8px 10px;
+      color: rgba(245, 242, 235, 0.5);
+    }
+
+    .verse-num.open .verse-num-option:hover {
+      background: rgba(218, 165, 32, 0.15);
+      color: var(--cream);
+    }
+
+    .verse-num.open .verse-num-option.current {
+      color: var(--gold);
     }
 
     /* ===== NAVIGATION AFFORDANCE ===== */
@@ -598,7 +640,9 @@
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
   
   <div class="progress" id="progress"></div>
-  <div class="verse-num" id="verseNum"></div>
+  <div class="verse-num" id="verseNum">
+    <!-- Verse options built dynamically -->
+  </div>
 
   <div class="word-tooltip" id="wordTooltip">
     <div class="word-tooltip-hebrew" id="tooltipHebrew"></div>
@@ -1085,6 +1129,59 @@
       }
     }
 
+    // ===== VERSE SELECTOR =====
+    let selectorOpen = false;
+
+    function buildVerseSelector() {
+      verseNum.innerHTML = '';
+      verses.forEach((verse, i) => {
+        const option = document.createElement('span');
+        option.className = 'verse-num-option';
+        option.textContent = verse.ref;
+        option.dataset.index = i;
+        option.addEventListener('click', e => {
+          e.stopPropagation();
+          if (selectorOpen) {
+            navigateToVerse(i);
+            closeSelector();
+          } else {
+            openSelector();
+          }
+        });
+        verseNum.appendChild(option);
+      });
+    }
+
+    function openSelector() {
+      if (selectorOpen) return;
+      selectorOpen = true;
+      verseNum.classList.add('open');
+    }
+
+    function closeSelector() {
+      if (!selectorOpen) return;
+      selectorOpen = false;
+      verseNum.classList.remove('open');
+    }
+
+    function toggleSelector() {
+      if (selectorOpen) closeSelector();
+      else openSelector();
+    }
+
+    function updateSelectorHighlight() {
+      const currentVerse = Math.max(0, Math.round(timeline.value) - INTRO_ANCHORS);
+      const options = verseNum.querySelectorAll('.verse-num-option');
+      options.forEach((opt, i) => {
+        opt.classList.toggle('current', i === currentVerse && timeline.value >= INTRO_ANCHORS);
+      });
+    }
+
+    function navigateToVerse(verseIndex) {
+      const targetAnchor = INTRO_ANCHORS + verseIndex;
+      timeline.set(targetAnchor);
+    }
+
     // ===== STATE =====
     // Anchors are sequential integers: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
     const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
@@ -1252,18 +1349,18 @@
       const p = timeline.update();
       const state = getState(p);
       const time = Date.now() - startTime;
-      
+
       // Subtle ambient motion only at true rest
       const atRest = Math.abs(timeline.velocity) < 0.01;
       const ambY = atRest ? Math.sin(time * 0.0006) * 2 : 0;
       const ambS = atRest ? 1 + Math.sin(time * 0.0008) * 0.002 : 1;
-      
+
       // English title
       titleEn.style.left = state.en.x + 'px';
       titleEn.style.top = (state.en.y + (state.en.opacity > 0.5 ? ambY * 0.5 : 0)) + 'px';
       titleEn.style.transform = 'translate(-50%, -50%)';
       titleEn.style.opacity = state.en.opacity;
-      
+
       // Qohelet
       const qAmbY = (p >= 1.8 && p <= 2.2 && atRest) ? ambY : 0;
       const qAmbS = (p >= 1.8 && p <= 2.2 && atRest) ? ambS : 1;
@@ -1272,8 +1369,8 @@
       qohelet.style.transform = `translate(-50%, -50%) scale(${state.q.scale * qAmbS})`;
       qohelet.style.opacity = state.q.opacity;
       qohelet.style.pointerEvents = state.q.opacity > 0.5 ? 'auto' : 'none';
-      
-      // Render all verses with single loop
+
+      // Render all verses
       verses.forEach((verse, i) => {
         const vState = state.v[i];
 
@@ -1282,7 +1379,7 @@
         verse.el.style.transform = `translateY(${vState.y}px)`;
         verse.el.style.pointerEvents = vState.opacity > 0.2 ? 'auto' : 'none';
 
-        // Hebrew words - staggered reveal based on vWords (0 to 1)
+        // Hebrew words - staggered reveal
         const wordProgress = state.vWords[i] * (verse.words.length + 1);
         verse.words.forEach((w, wi) => {
           const wordT = Math.max(0, Math.min(1, wordProgress - wi));
@@ -1297,9 +1394,9 @@
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
 
-      // Verse number
-      verseNum.textContent = state.verseNum;
+      // Verse selector - update current highlight and visibility
       verseNum.style.opacity = state.verseNum ? 1 : 0;
+      updateSelectorHighlight();
 
       // Update navigation hints
       updateHints(p);
@@ -1374,6 +1471,13 @@
     let keyHeld = false, keyTimer = null;
     
     document.addEventListener('keydown', e => {
+      // Escape closes selector
+      if (e.key === 'Escape' && selectorOpen) {
+        e.preventDefault();
+        closeSelector();
+        return;
+      }
+
       if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
         e.preventDefault();
         if (!keyHeld) {
@@ -1400,12 +1504,12 @@
     });
     
     let touch = { y: 0, scrolling: false };
-    
+
     document.addEventListener('touchstart', e => {
       touch.y = e.touches[0].clientY;
       touch.scrolling = false;
     }, { passive: true });
-    
+
     document.addEventListener('touchmove', e => {
       const dy = e.touches[0].clientY - touch.y;
       if (Math.abs(dy) > 8) {
@@ -1415,13 +1519,15 @@
           hideTooltip();
           clearLit();
         }
+        // Close selector on scroll
+        if (selectorOpen) closeSelector();
       }
       if (touch.scrolling) {
         timeline.nudge(-dy / 280);
         touch.y = e.touches[0].clientY;
       }
     }, { passive: true });
-    
+
     document.addEventListener('touchend', () => {
       if (touch.scrolling) snap();
     });
@@ -1434,6 +1540,8 @@
         hideTooltip();
         clearLit();
       }
+      // Close selector on scroll
+      if (selectorOpen) closeSelector();
       timeline.nudge(e.deltaY / 320);
       clearTimeout(wheelTimer);
       wheelTimer = setTimeout(snap, 100);
@@ -1443,6 +1551,7 @@
     function init() {
       measure();
       setupHitDetection();
+      buildVerseSelector();
       startTime = Date.now();
 
       timeline.snap(0);
@@ -1452,9 +1561,16 @@
       titleEn.style.opacity = s.en.opacity;
       qohelet.style.opacity = s.q.opacity;
 
-      // Apply initial state to all verses dynamically
+      // Apply initial state to all verses
       verses.forEach((verse, i) => {
         verse.el.style.opacity = s.v[i].opacity;
+      });
+
+      // Close selector when clicking outside
+      document.addEventListener('click', e => {
+        if (selectorOpen && !e.target.closest('.verse-num')) {
+          closeSelector();
+        }
       });
 
       requestAnimationFrame(render);
