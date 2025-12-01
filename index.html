@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ecclesiastes 1:1-4</title>
+  <title>Ecclesiastes 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -580,6 +580,111 @@
         border-bottom-color: rgba(218, 165, 32, 0.25);
       }
     }
+
+    /* ===== VERSE LOADING STATE ===== */
+    .verse.loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+    }
+
+    .verse.loading .verse-loading-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+
+    .verse-loading-breath {
+      font-size: clamp(36px, 7vw, 72px);
+      color: var(--gold);
+      opacity: 0.4;
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    .verse-loading-text {
+      font-size: clamp(11px, 1.4vw, 15px);
+      color: rgba(218, 165, 32, 0.45);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.25; transform: scale(0.98); }
+      50% { opacity: 0.55; transform: scale(1.02); }
+    }
+
+    /* ===== VERSE ERROR STATE ===== */
+    .verse.error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+    }
+
+    .verse.error .verse-error-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+
+    .verse-error-text {
+      font-size: clamp(12px, 1.6vw, 16px);
+      color: rgba(245, 242, 235, 0.45);
+      letter-spacing: 0.08em;
+      font-weight: 300;
+    }
+
+    .verse-error-retry {
+      font-size: clamp(10px, 1.3vw, 13px);
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.6em 1.2em;
+      border: 1px solid rgba(218, 165, 32, 0.25);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .verse-error-retry:hover {
+      background: rgba(218, 165, 32, 0.1);
+      border-color: rgba(218, 165, 32, 0.4);
+    }
+
+    /* ===== TIDBIT LOADING STATE ===== */
+    .word-tooltip-tidbit.loading {
+      color: rgba(218, 165, 32, 0.4);
+      font-style: italic;
+    }
+
+    /* ===== END OF CHAPTER ===== */
+    .end-of-chapter {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8em;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .end-of-chapter.visible {
+      opacity: 1;
+    }
+
+    .end-of-chapter-text {
+      font-size: clamp(12px, 1.5vw, 16px);
+      color: rgba(218, 165, 32, 0.5);
+      letter-spacing: 0.12em;
+      font-weight: 300;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -660,6 +765,10 @@
     <span class="tap-hint-text">Tap the word to explore</span>
   </div>
 
+  <!-- End of chapter marker (appears after last verse) -->
+  <div class="end-of-chapter" id="endOfChapter">
+    <span class="end-of-chapter-text">End of Chapter 1</span>
+  </div>
 
   <script>
     // ===== ELEMENTS =====
@@ -679,7 +788,7 @@
       words: [...el.querySelectorAll('.word-he')],
       ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
     }));
-    const VERSE_COUNT = verses.length;
+    let VERSE_COUNT = verses.length;  // Dynamic: updated as verses load
 
     const wordTooltip = $('wordTooltip');
     const tooltipHebrew = $('tooltipHebrew');
@@ -793,16 +902,326 @@
       }
     };
 
+    // ===== DYNAMIC VERSE LOADING =====
+    const STATIC_VERSES = 4;  // Verses 1-4 are hardcoded in HTML
+    const CHAPTER_VERSES = 18;  // Ecclesiastes chapter 1 has 18 verses
+
+    const verseLoading = {
+      loaded: new Set([1, 2, 3, 4]),  // Which verses have HTML loaded
+      tidbitsLoaded: new Set([1, 2, 3, 4]),  // Which verses have tidbits loaded (static have them)
+      currentlyLoading: null,  // Verse number currently being fetched
+      endReached: false  // True when we've loaded verse 18
+    };
+
+    const endOfChapter = $('endOfChapter');
+
+    // ===== API CALLS =====
+    async function fetchVerseHTML(verseNum) {
+      const ref = `1:${verseNum}`;
+
+      // Check client cache first
+      const cacheKey = `ecc-verse-html-${ref}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.log(`[Cache hit] Verse ${ref} HTML`);
+        return JSON.parse(cached);
+      }
+
+      console.log(`[Fetching] Verse ${ref} HTML from API...`);
+      const response = await fetch('/api/verse-html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      return data;
+    }
+
+    async function fetchVerseTidbits(verseNum, links) {
+      const ref = `1:${verseNum}`;
+
+      // Check client cache
+      const cacheKey = `ecc-verse-tidbits-${ref}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.log(`[Cache hit] Verse ${ref} tidbits`);
+        return JSON.parse(cached);
+      }
+
+      console.log(`[Fetching] Verse ${ref} tidbits from API...`);
+      const response = await fetch('/api/verse-tidbits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref, links })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      return data;
+    }
+
+    // ===== DOM CREATION =====
+    function createLoadingVerse(verseNum) {
+      const el = document.createElement('div');
+      el.className = 'verse loading';
+      el.id = `verse${verseNum}`;
+      el.innerHTML = `
+        <div class="verse-loading-inner">
+          <div class="verse-loading-breath">הֶבֶל</div>
+          <span class="verse-loading-text">Preparing verse ${verseNum}</span>
+        </div>
+      `;
+      return el;
+    }
+
+    function createErrorVerse(verseNum) {
+      const el = document.createElement('div');
+      el.className = 'verse error';
+      el.id = `verse${verseNum}`;
+      el.innerHTML = `
+        <div class="verse-error-inner">
+          <span class="verse-error-text">Could not load verse</span>
+          <button class="verse-error-retry" onclick="retryVerse(${verseNum})">Try again</button>
+        </div>
+      `;
+      return el;
+    }
+
+    // ===== INJECT VERSE HTML =====
+    function injectVerseHTML(verseNum, data) {
+      const existing = document.getElementById(`verse${verseNum}`);
+
+      const verse = document.createElement('div');
+      verse.className = 'verse';
+      verse.id = `verse${verseNum}`;
+      verse.dataset.links = JSON.stringify(data.links);
+
+      verse.innerHTML = `
+        <div class="verse-he">${data.hebrew}</div>
+        <div class="verse-en" id="verse${verseNum}En">${data.english}</div>
+      `;
+
+      if (existing) {
+        existing.replaceWith(verse);
+      } else {
+        const scene = document.querySelector('.scene');
+        scene.appendChild(verse);
+      }
+
+      // Update verses array
+      const verseIndex = verseNum - 1;
+      verses[verseIndex] = {
+        el: verse,
+        en: verse.querySelector('.verse-en'),
+        words: [...verse.querySelectorAll('.word-he')],
+        ref: `1:${verseNum}`
+      };
+
+      // Setup interactions for new verse
+      setupVerseHitDetection(verse);
+
+      return verse;
+    }
+
+    // ===== SETUP HIT DETECTION FOR SINGLE VERSE =====
+    function setupVerseHitDetection(verseEl) {
+      // Desktop hover
+      verseEl.addEventListener('mousemove', e => {
+        if (tooltipVisible) return;
+        const result = findWordAtPoint(e.clientX, e.clientY, verseEl);
+        if (result) lightUp(result.link, false);
+      });
+
+      verseEl.addEventListener('mouseleave', () => {
+        if (!tooltipVisible) clearLit();
+      });
+
+      // Desktop click
+      verseEl.addEventListener('click', e => {
+        const result = findWordAtPoint(e.clientX, e.clientY, verseEl);
+        if (result) handleWordInteraction(result.el, result.link, e);
+      });
+
+      // Mobile touch
+      verseEl.addEventListener('touchstart', e => {
+        const t = e.touches[0];
+        const result = findWordAtPoint(t.clientX, t.clientY, verseEl);
+        if (result) {
+          e.preventDefault();
+          touch.pendingTap = { el: result.el, link: result.link };
+          addTouchFeedback(result.el);
+        }
+      }, { passive: false });
+    }
+
+    // ===== LOAD VERSE =====
+    async function loadVerse(verseNum) {
+      // Guard: already loaded, currently loading, or out of range
+      if (verseLoading.loaded.has(verseNum) ||
+          verseLoading.currentlyLoading === verseNum ||
+          verseNum <= STATIC_VERSES ||
+          verseNum > CHAPTER_VERSES) {
+        return;
+      }
+
+      verseLoading.currentlyLoading = verseNum;
+
+      // Create and insert loading placeholder
+      const loadingEl = createLoadingVerse(verseNum);
+      const scene = document.querySelector('.scene');
+      const prevVerse = document.getElementById(`verse${verseNum - 1}`);
+
+      if (prevVerse) {
+        prevVerse.after(loadingEl);
+      } else {
+        scene.appendChild(loadingEl);
+      }
+
+      // Add to verses array for positioning
+      verses[verseNum - 1] = {
+        el: loadingEl,
+        en: null,
+        words: [],
+        ref: `1:${verseNum}`
+      };
+
+      // Update bounds and re-measure
+      updateVerseBounds();
+      buildVerseSelector();
+      measure();
+
+      try {
+        const data = await fetchVerseHTML(verseNum);
+
+        // Inject the actual verse content
+        injectVerseHTML(verseNum, data);
+        verseLoading.loaded.add(verseNum);
+        verseLoading.currentlyLoading = null;
+
+        // Check if we've reached the end
+        if (verseNum >= CHAPTER_VERSES) {
+          verseLoading.endReached = true;
+        }
+
+        // Update bounds and re-measure
+        updateVerseBounds();
+        buildVerseSelector();
+        measure();
+
+      } catch (error) {
+        console.error(`Failed to load verse ${verseNum}:`, error);
+        verseLoading.currentlyLoading = null;
+
+        // Replace loading with error
+        const errorEl = createErrorVerse(verseNum);
+        loadingEl.replaceWith(errorEl);
+        verses[verseNum - 1].el = errorEl;
+      }
+    }
+
+    // ===== RETRY FAILED VERSE =====
+    window.retryVerse = function(verseNum) {
+      const errorEl = document.getElementById(`verse${verseNum}`);
+      if (errorEl) errorEl.remove();
+
+      // Clear from verses array
+      delete verses[verseNum - 1];
+      updateVerseBounds();
+
+      // Try again
+      loadVerse(verseNum);
+    };
+
+    // ===== LAZY LOAD TIDBITS =====
+    async function ensureTidbits(verseNum) {
+      // Static verses already have tidbits
+      if (verseNum <= STATIC_VERSES) return true;
+
+      // Already loaded
+      if (verseLoading.tidbitsLoaded.has(verseNum)) return true;
+
+      const verseEl = document.getElementById(`verse${verseNum}`);
+      if (!verseEl?.dataset.links) return false;
+
+      const links = JSON.parse(verseEl.dataset.links);
+
+      try {
+        const data = await fetchVerseTidbits(verseNum, links);
+
+        // Merge into wordData
+        Object.entries(data.words).forEach(([link, info]) => {
+          if (!wordData[link]) {
+            wordData[link] = info;
+          }
+        });
+
+        verseLoading.tidbitsLoaded.add(verseNum);
+        return true;
+
+      } catch (error) {
+        console.error(`Failed to load tidbits for verse ${verseNum}:`, error);
+        return false;
+      }
+    }
+
+    // ===== UPDATE VERSE BOUNDS =====
+    function updateVerseBounds() {
+      // Count actual verses (loaded or loading placeholders)
+      const loadedCount = verses.filter(v => v && v.el).length;
+      VERSE_COUNT = loadedCount;
+      MAX = INTRO_ANCHORS + VERSE_COUNT - 1;
+    }
+
+    // ===== CHECK IF NEXT VERSE NEEDED =====
+    function checkVerseNeeded() {
+      if (verseLoading.currentlyLoading || verseLoading.endReached) return;
+
+      const currentAnchor = Math.round(timeline.target);
+      const verseIndex = currentAnchor - INTRO_ANCHORS;
+      const currentVerseNum = verseIndex + 1;
+
+      // When user reaches the last loaded verse, load the next one
+      if (currentVerseNum > 0 && currentVerseNum >= VERSE_COUNT) {
+        const nextVerseNum = currentVerseNum + 1;
+        if (nextVerseNum > STATIC_VERSES && nextVerseNum <= CHAPTER_VERSES) {
+          loadVerse(nextVerseNum);
+        }
+      }
+    }
+
+    // ===== SHOW END OF CHAPTER =====
+    function updateEndOfChapter(position) {
+      if (!verseLoading.endReached) {
+        endOfChapter.classList.remove('visible');
+        return;
+      }
+
+      // Show when user is at or past the last verse
+      const lastVerseAnchor = INTRO_ANCHORS + CHAPTER_VERSES - 1;
+      if (position >= lastVerseAnchor - 0.2) {
+        endOfChapter.classList.add('visible');
+      } else {
+        endOfChapter.classList.remove('visible');
+      }
+    }
+
     // ===== TOOLTIP =====
     let tooltipVisible = false;
     let activeWord = null;
 
     let hideTooltipTimer = null;
 
-    function showTooltip(wordEl, linkValue) {
-      const data = wordData[linkValue];
-      if (!data) return;
-
+    async function showTooltip(wordEl, linkValue) {
       // Cancel any pending hide animation
       if (hideTooltipTimer) {
         clearTimeout(hideTooltipTimer);
@@ -810,11 +1229,63 @@
       }
 
       activeWord = wordEl;
+
+      // Find which verse this word belongs to
+      const verseEl = wordEl.closest('.verse');
+      const verseNum = verseEl ? parseInt(verseEl.id.replace('verse', '')) : null;
+
+      // Check if we have tidbit data
+      let data = wordData[linkValue];
+
+      // For dynamic verses, we may need to lazy-load tidbits
+      if (!data && verseNum && verseNum > STATIC_VERSES) {
+        // Show tooltip immediately with loading state
+        tooltipHebrew.textContent = wordEl.textContent;
+        tooltipTransliteration.textContent = '';
+        tooltipTidbit.textContent = 'Loading...';
+        tooltipTidbit.classList.add('loading');
+
+        // Position and show
+        positionTooltip(wordEl);
+        wordTooltip.classList.add('visible');
+        tooltipVisible = true;
+
+        // Fetch tidbits
+        const loaded = await ensureTidbits(verseNum);
+        if (loaded && wordData[linkValue]) {
+          data = wordData[linkValue];
+          tooltipHebrew.textContent = data.hebrew;
+          tooltipTransliteration.textContent = data.transliteration;
+          tooltipTidbit.textContent = data.tidbit;
+          tooltipTidbit.classList.remove('loading');
+        } else {
+          tooltipTidbit.textContent = 'Could not load details';
+          tooltipTidbit.classList.remove('loading');
+        }
+
+        hideTapHint();
+        return;
+      }
+
+      // No data available at all
+      if (!data) return;
+
+      // Normal tooltip display
       tooltipHebrew.textContent = data.hebrew;
       tooltipTransliteration.textContent = data.transliteration;
       tooltipTidbit.textContent = data.tidbit;
+      tooltipTidbit.classList.remove('loading');
 
-      // Position the tooltip
+      // Position and show tooltip
+      positionTooltip(wordEl);
+      wordTooltip.classList.add('visible');
+      tooltipVisible = true;
+
+      // Hide tap hint when user interacts
+      hideTapHint();
+    }
+
+    function positionTooltip(wordEl) {
       const rect = wordEl.getBoundingClientRect();
       const isHebrew = wordEl.classList.contains('word-he') || wordEl.classList.contains('title-he');
 
@@ -830,16 +1301,13 @@
       }
 
       // Position based on word type: above Hebrew (top of verse), below English (bottom of verse)
-      // Offset scales with viewport for consistent spacing at all sizes
       const offset = Math.max(14, window.innerWidth * 0.015);
       let top;
       let isAbove;
       if (isHebrew) {
-        // Hebrew words: tooltip above
         top = rect.top - offset;
         isAbove = true;
       } else {
-        // English words: tooltip below
         top = rect.bottom + offset;
         isAbove = false;
       }
@@ -856,7 +1324,7 @@
       // Remove animation classes before repositioning
       wordTooltip.classList.remove('visible', 'hiding', 'above');
 
-      // Position first
+      // Position
       wordTooltip.style.left = left + 'px';
       wordTooltip.style.top = top + 'px';
 
@@ -870,13 +1338,6 @@
 
       // Force reflow for animation restart
       void wordTooltip.offsetHeight;
-
-      // Trigger spring-in animation
-      wordTooltip.classList.add('visible');
-      tooltipVisible = true;
-
-      // Hide tap hint when user interacts
-      hideTapHint();
     }
 
     function hideTooltip() {
@@ -1187,7 +1648,7 @@
     // ===== STATE =====
     // Anchors are sequential integers: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
     const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
-    const MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
+    let MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Dynamic: updated as verses load
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -1349,6 +1810,10 @@
     // ===== RENDER =====
     function render() {
       const p = timeline.update();
+
+      // Check if we need to load the next verse
+      checkVerseNeeded();
+
       const state = getState(p);
       const time = Date.now() - startTime;
 
@@ -1402,6 +1867,9 @@
 
       // Update navigation hints
       updateHints(p);
+
+      // Update end of chapter visibility
+      updateEndOfChapter(p);
 
       requestAnimationFrame(render);
     }
