@@ -250,26 +250,58 @@
       position: fixed;
       top: clamp(20px, 3vw, 40px);
       right: clamp(20px, 3vw, 40px);
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
       font-size: clamp(14px, 2vw, 22px);
       color: rgba(245, 242, 235, 0.7);
       font-weight: 400;
       letter-spacing: 0.12em;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .verse-num-current {
       cursor: pointer;
       padding: 8px 12px;
       margin: -8px -12px;
       border-radius: 8px;
       transition: background 0.2s ease, color 0.2s ease;
-      -webkit-user-select: none;
-      user-select: none;
     }
 
-    .verse-num:hover {
+    .verse-num-current:hover {
       background: rgba(218, 165, 32, 0.1);
       color: var(--cream);
     }
 
-    .verse-num:active {
-      background: rgba(218, 165, 32, 0.2);
+    .verse-num-selector {
+      display: flex;
+      gap: 0.3em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .verse-num-selector.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .verse-num-option {
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: rgba(245, 242, 235, 0.5);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .verse-num-option:hover {
+      background: rgba(218, 165, 32, 0.15);
+      color: var(--cream);
+    }
+
+    .verse-num-option.active {
+      color: var(--gold);
     }
 
     /* ===== NAVIGATION AFFORDANCE ===== */
@@ -614,7 +646,10 @@
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
   
   <div class="progress" id="progress"></div>
-  <div class="verse-num" id="verseNum"></div>
+  <div class="verse-num" id="verseNum">
+    <span class="verse-num-current" id="verseNumCurrent"></span>
+    <div class="verse-num-selector" id="verseNumSelector"></div>
+  </div>
 
   <div class="word-tooltip" id="wordTooltip">
     <div class="word-tooltip-hebrew" id="tooltipHebrew"></div>
@@ -1101,57 +1136,55 @@
       }
     }
 
-    // ===== ZOOM STATE =====
-    // Zoom: 0 = normal verse view, 1 = zoomed out (all verses visible)
-    let zoomLevel = 0;
-    const zoomSpring = new Spring(0);
-    zoomSpring.baseTension = 50;
-    zoomSpring.baseFriction = 12;
+    // ===== VERSE SELECTOR =====
+    const verseNumCurrent = $('verseNumCurrent');
+    const verseNumSelector = $('verseNumSelector');
+    let selectorOpen = false;
 
-    // Pinch gesture state
-    let pinch = {
-      active: false,
-      startDist: 0,
-      lastDist: 0,
-      startZoom: 0
-    };
-
-    function getPinchDistance(touches) {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
+    function buildVerseSelector() {
+      verseNumSelector.innerHTML = '';
+      verses.forEach((verse, i) => {
+        const option = document.createElement('span');
+        option.className = 'verse-num-option';
+        option.textContent = i + 1;
+        option.addEventListener('click', e => {
+          e.stopPropagation();
+          navigateToVerse(i);
+          closeSelector();
+        });
+        verseNumSelector.appendChild(option);
+      });
     }
 
-    function zoomOut() {
-      if (zoomLevel === 1) return;
-      zoomLevel = 1;
-      zoomSpring.target = 1;
-      zoomSpring.lastInput = Date.now();
-      // Hide tooltip if visible
-      if (tooltipVisible) {
-        hideTooltip();
-        clearLit();
-      }
+    function openSelector() {
+      if (selectorOpen) return;
+      selectorOpen = true;
+      verseNumSelector.classList.add('visible');
+      updateSelectorHighlight();
     }
 
-    function zoomIn(verseIndex) {
-      if (zoomLevel === 0) return;
-      zoomLevel = 0;
-      zoomSpring.target = 0;
-      zoomSpring.lastInput = Date.now();
-      // If a verse was tapped, navigate to it
-      if (verseIndex !== undefined && verseIndex >= 0) {
-        const targetAnchor = INTRO_ANCHORS + verseIndex;
-        timeline.set(targetAnchor);
-      }
+    function closeSelector() {
+      if (!selectorOpen) return;
+      selectorOpen = false;
+      verseNumSelector.classList.remove('visible');
     }
 
-    function toggleZoom() {
-      if (zoomLevel === 0) {
-        zoomOut();
-      } else {
-        zoomIn();
-      }
+    function toggleSelector() {
+      if (selectorOpen) closeSelector();
+      else openSelector();
+    }
+
+    function updateSelectorHighlight() {
+      const currentVerse = Math.max(0, Math.round(timeline.value) - INTRO_ANCHORS);
+      const options = verseNumSelector.querySelectorAll('.verse-num-option');
+      options.forEach((opt, i) => {
+        opt.classList.toggle('active', i === currentVerse && timeline.value >= INTRO_ANCHORS);
+      });
+    }
+
+    function navigateToVerse(verseIndex) {
+      const targetAnchor = INTRO_ANCHORS + verseIndex;
+      timeline.set(targetAnchor);
     }
 
     // ===== STATE =====
@@ -1319,90 +1352,59 @@
     // ===== RENDER =====
     function render() {
       const p = timeline.update();
-      const z = zoomSpring.update();
       const state = getState(p);
       const time = Date.now() - startTime;
 
       // Subtle ambient motion only at true rest
-      const atRest = Math.abs(timeline.velocity) < 0.01 && Math.abs(zoomSpring.velocity) < 0.01;
+      const atRest = Math.abs(timeline.velocity) < 0.01;
       const ambY = atRest ? Math.sin(time * 0.0006) * 2 : 0;
       const ambS = atRest ? 1 + Math.sin(time * 0.0008) * 0.002 : 1;
 
-      // Zoom calculations
-      const zoomScale = 1 - z * 0.6; // 1.0 -> 0.4 when zoomed out
-      const currentVerse = Math.max(0, Math.round(p) - INTRO_ANCHORS);
-
-      // English title - fade out when zooming
+      // English title
       titleEn.style.left = state.en.x + 'px';
       titleEn.style.top = (state.en.y + (state.en.opacity > 0.5 ? ambY * 0.5 : 0)) + 'px';
       titleEn.style.transform = 'translate(-50%, -50%)';
-      titleEn.style.opacity = state.en.opacity * (1 - z);
+      titleEn.style.opacity = state.en.opacity;
 
-      // Qohelet - fade out when zooming
+      // Qohelet
       const qAmbY = (p >= 1.8 && p <= 2.2 && atRest) ? ambY : 0;
       const qAmbS = (p >= 1.8 && p <= 2.2 && atRest) ? ambS : 1;
       qohelet.style.left = state.q.x + 'px';
       qohelet.style.top = (state.q.y + qAmbY) + 'px';
       qohelet.style.transform = `translate(-50%, -50%) scale(${state.q.scale * qAmbS})`;
-      qohelet.style.opacity = state.q.opacity * (1 - z);
-      qohelet.style.pointerEvents = (state.q.opacity > 0.5 && z < 0.5) ? 'auto' : 'none';
+      qohelet.style.opacity = state.q.opacity;
+      qohelet.style.pointerEvents = state.q.opacity > 0.5 ? 'auto' : 'none';
 
       // Render all verses
-      const verseSpacing = 120; // px between verses when zoomed out
-      const totalHeight = (VERSE_COUNT - 1) * verseSpacing;
-      const startY = pos.cy - totalHeight / 2;
-
       verses.forEach((verse, i) => {
         const vState = state.v[i];
 
-        // When zoomed out, show all verses stacked vertically
-        // When zoomed in, use normal state-based rendering
-        const zoomedY = startY + i * verseSpacing - pos.cy;
-        const normalY = vState.y;
-        const finalY = lerp(normalY, zoomedY, z);
+        // Verse container
+        verse.el.style.opacity = vState.opacity;
+        verse.el.style.transform = `translateY(${vState.y}px)`;
+        verse.el.style.pointerEvents = vState.opacity > 0.2 ? 'auto' : 'none';
 
-        // Opacity: when zoomed out, all verses visible but current is brighter
-        const isCurrentVerse = i === currentVerse && p >= INTRO_ANCHORS;
-        const zoomedOpacity = isCurrentVerse ? 1 : 0.5;
-        const normalOpacity = vState.opacity;
-        const finalOpacity = lerp(normalOpacity, zoomedOpacity, z);
-
-        // Apply transforms
-        verse.el.style.opacity = finalOpacity;
-        verse.el.style.transform = `translateY(${finalY}px) scale(${zoomScale})`;
-        verse.el.style.pointerEvents = finalOpacity > 0.2 ? 'auto' : 'none';
-
-        // Show verse reference label when zoomed out
-        if (z > 0.5) {
-          verse.el.style.cursor = 'pointer';
-        } else {
-          verse.el.style.cursor = 'default';
-        }
-
-        // Hebrew words - staggered reveal based on vWords (0 to 1)
-        // When zoomed out, show all words immediately
-        const wordProgress = z > 0.5 ? verse.words.length + 1 : state.vWords[i] * (verse.words.length + 1);
+        // Hebrew words - staggered reveal
+        const wordProgress = state.vWords[i] * (verse.words.length + 1);
         verse.words.forEach((w, wi) => {
           const wordT = Math.max(0, Math.min(1, wordProgress - wi));
-          w.style.opacity = z > 0.5 ? 1 : wordT;
-          w.style.transform = (wordT < 1 && z < 0.5) ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+          w.style.opacity = wordT;
+          w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
         });
 
-        // English translation - hide when zoomed out for cleaner look
-        verse.en.style.opacity = state.vEn[i] * (1 - z * 0.8);
+        // English translation
+        verse.en.style.opacity = state.vEn[i];
       });
 
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
 
-      // Verse number - change label when zoomed
-      if (z > 0.5) {
-        verseNum.textContent = 'Chapter 1';
-        verseNum.style.opacity = 1;
-      } else {
-        verseNum.textContent = state.verseNum;
-        verseNum.style.opacity = state.verseNum ? 1 : 0;
-      }
+      // Verse number
+      verseNumCurrent.textContent = state.verseNum;
+      verseNum.style.opacity = state.verseNum ? 1 : 0;
+
+      // Update selector highlight if open
+      if (selectorOpen) updateSelectorHighlight();
 
       // Update navigation hints
       updateHints(p);
@@ -1477,15 +1479,12 @@
     let keyHeld = false, keyTimer = null;
     
     document.addEventListener('keydown', e => {
-      // Escape zooms back in
-      if (e.key === 'Escape' && zoomLevel === 1) {
+      // Escape closes selector
+      if (e.key === 'Escape' && selectorOpen) {
         e.preventDefault();
-        zoomIn();
+        closeSelector();
         return;
       }
-
-      // Skip navigation if zoomed out
-      if (zoomLevel === 1) return;
 
       if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
         e.preventDefault();
@@ -1515,47 +1514,11 @@
     let touch = { y: 0, scrolling: false };
 
     document.addEventListener('touchstart', e => {
-      // Check for pinch gesture (2 fingers)
-      if (e.touches.length === 2) {
-        pinch.active = true;
-        pinch.startDist = getPinchDistance(e.touches);
-        pinch.lastDist = pinch.startDist;
-        pinch.startZoom = zoomLevel;
-        touch.scrolling = false;
-        return;
-      }
-
       touch.y = e.touches[0].clientY;
       touch.scrolling = false;
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-      // Handle pinch gesture
-      if (e.touches.length === 2 && pinch.active) {
-        const dist = getPinchDistance(e.touches);
-        const delta = dist - pinch.lastDist;
-        pinch.lastDist = dist;
-
-        // Pinch in (squeeze fingers) = zoom out to chapter view (see more)
-        // Pinch out (spread fingers) = zoom in to verse view (see detail)
-        const threshold = 50; // pixels of pinch movement to trigger
-        const totalDelta = dist - pinch.startDist;
-
-        if (pinch.startZoom === 0 && totalDelta < -threshold) {
-          // Squeezing fingers -> zoom out to see all verses
-          zoomOut();
-          pinch.active = false; // Prevent repeated triggers
-        } else if (pinch.startZoom === 1 && totalDelta > threshold) {
-          // Spreading fingers -> zoom back into current verse
-          zoomIn();
-          pinch.active = false;
-        }
-        return;
-      }
-
-      // Skip scroll handling if zoomed out
-      if (zoomLevel === 1) return;
-
       const dy = e.touches[0].clientY - touch.y;
       if (Math.abs(dy) > 8) {
         touch.scrolling = true;
@@ -1564,6 +1527,8 @@
           hideTooltip();
           clearLit();
         }
+        // Close selector on scroll
+        if (selectorOpen) closeSelector();
       }
       if (touch.scrolling) {
         timeline.nudge(-dy / 280);
@@ -1571,24 +1536,20 @@
       }
     }, { passive: true });
 
-    document.addEventListener('touchend', e => {
-      // Reset pinch state when fingers lifted
-      if (e.touches.length < 2) {
-        pinch.active = false;
-      }
+    document.addEventListener('touchend', () => {
       if (touch.scrolling) snap();
     });
     
     let wheelTimer;
     document.addEventListener('wheel', e => {
       e.preventDefault();
-      // Skip scroll handling if zoomed out
-      if (zoomLevel === 1) return;
       // Hide tooltip on scroll
       if (tooltipVisible) {
         hideTooltip();
         clearLit();
       }
+      // Close selector on scroll
+      if (selectorOpen) closeSelector();
       timeline.nudge(e.deltaY / 320);
       clearTimeout(wheelTimer);
       wheelTimer = setTimeout(snap, 100);
@@ -1598,45 +1559,31 @@
     function init() {
       measure();
       setupHitDetection();
+      buildVerseSelector();
       startTime = Date.now();
 
       timeline.snap(0);
-      zoomSpring.snap(0);
 
       // Apply initial state
       const s = getAnchorState(0);
       titleEn.style.opacity = s.en.opacity;
       qohelet.style.opacity = s.q.opacity;
 
-      // Apply initial state to all verses dynamically
+      // Apply initial state to all verses
       verses.forEach((verse, i) => {
         verse.el.style.opacity = s.v[i].opacity;
-
-        // Add click handler for verse selection when zoomed out
-        verse.el.addEventListener('click', e => {
-          if (zoomLevel === 1) {
-            e.stopPropagation();
-            zoomIn(i);
-          }
-        });
       });
 
-      // Verse number tap to toggle zoom
-      verseNum.addEventListener('click', e => {
+      // Verse number click to toggle selector
+      verseNumCurrent.addEventListener('click', e => {
         e.stopPropagation();
-        toggleZoom();
+        toggleSelector();
       });
 
-      verseNum.addEventListener('touchstart', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleZoom();
-      }, { passive: false });
-
-      // Tap anywhere to zoom back in when zoomed out
+      // Close selector when clicking outside
       document.addEventListener('click', e => {
-        if (zoomLevel === 1 && !e.target.closest('.verse') && !e.target.closest('.verse-num')) {
-          zoomIn();
+        if (selectorOpen && !e.target.closest('.verse-num')) {
+          closeSelector();
         }
       });
 
