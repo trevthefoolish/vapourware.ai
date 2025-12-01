@@ -643,23 +643,20 @@
     const $ = id => document.getElementById(id);
     const titleEn = $('titleEn');
     const qohelet = $('qohelet');
-    const verse1 = $('verse1');
-    const verse2 = $('verse2');
-    const verse3 = $('verse3');
-    const verse4 = $('verse4');
-    const verse1En = $('verse1En');
-    const verse2En = $('verse2En');
-    const verse3En = $('verse3En');
-    const verse4En = $('verse4En');
     const ph1 = $('ph1');
     const ph2 = $('ph2');
     const progress = $('progress');
     const verseNum = $('verseNum');
 
-    const v1Words = [...verse1.querySelectorAll('.word-he')];
-    const v2Words = [...verse2.querySelectorAll('.word-he')];
-    const v3Words = [...verse3.querySelectorAll('.word-he')];
-    const v4Words = [...verse4.querySelectorAll('.word-he')];
+    // ===== DYNAMIC VERSE DISCOVERY =====
+    // Automatically finds all verse elements in the DOM
+    const verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
+      el,
+      en: el.querySelector('.verse-en'),
+      words: [...el.querySelectorAll('.word-he')],
+      ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
+    }));
+    const VERSE_COUNT = verses.length;
 
     const wordTooltip = $('wordTooltip');
     const tooltipHebrew = $('tooltipHebrew');
@@ -965,7 +962,7 @@
     }
     
     function setupHitDetection() {
-      [verse1, verse2, verse3, verse4].forEach(c => {
+      verses.forEach(({ el: c }) => {
         // Desktop hover highlighting
         c.addEventListener('mousemove', e => {
           if (tooltipVisible) return; // Don't change highlights while tooltip is shown
@@ -1138,8 +1135,10 @@
     }
 
     // ===== STATE =====
-    const MAX = 6;
-    const ANCHORS = [0, 1, 2, 3, 4, 5, 6];
+    // Anchors: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
+    const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
+    const MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
+    const ANCHORS = Array.from({ length: MAX + 1 }, (_, i) => i);
     const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
     
     const timeline = new Spring(0);
@@ -1150,15 +1149,13 @@
       // Reset for measurement
       titleEn.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
       qohelet.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
-      verse1.style.cssText = 'position:absolute;opacity:1;transform:none';
-      verse2.style.cssText = 'position:absolute;opacity:1;transform:none';
-      verse3.style.cssText = 'position:absolute;opacity:1;transform:none';
-      verse4.style.cssText = 'position:absolute;opacity:1;transform:none';
-      v1Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
-      v2Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
-      v3Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
-      v4Words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
-      
+
+      // Reset all verses dynamically
+      verses.forEach(verse => {
+        verse.el.style.cssText = 'position:absolute;opacity:1;transform:none';
+        verse.words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+      });
+
       void document.body.offsetHeight;
       
       const scene = document.querySelector('.scene').getBoundingClientRect();
@@ -1176,138 +1173,94 @@
 
     // ===== EXACT ANCHOR STATES =====
     // These are the guaranteed "resting" states - no interpolation
-    
+
+    // Helper: generate verse visibility states for a given active verse index (-1 = none active)
+    function generateVerseStates(activeVerseIndex) {
+      const v = {};  // verse container states
+      const vWords = {};  // word visibility (0-1)
+      const vEn = {};  // english visibility (0-1)
+
+      verses.forEach((_, i) => {
+        const isActive = i === activeVerseIndex;
+        const isPast = i < activeVerseIndex;
+
+        v[i] = {
+          opacity: isActive ? 1 : 0,
+          y: isPast ? -15 : (isActive ? 0 : 25)
+        };
+        vWords[i] = isActive ? 1 : 0;
+        vEn[i] = isActive ? 1 : 0;
+      });
+
+      return { v, vWords, vEn };
+    }
+
     function getAnchorState(anchor) {
-      switch(anchor) {
-        case 0: return {
-          en: { x: pos.cx, y: pos.cy, opacity: 1 },
-          q: { x: pos.cx, y: pos.cy + 70, scale: 1, opacity: 0 },
-          v1: { opacity: 0, y: 25 },
-          v2: { opacity: 0, y: 25 },
-          v3: { opacity: 0, y: 25 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 0,
-          v2Words: 0,
-          v3Words: 0,
-          v4Words: 0,
-          v1En: 0,
-          v2En: 0,
-          v3En: 0,
-          v4En: 0,
-          verseNum: ''
-        };
-        case 1: return {
-          en: { x: pos.cx, y: pos.cy - 50, opacity: 1 },
-          q: { x: pos.cx, y: pos.cy + 40, scale: 1, opacity: 1 },
-          v1: { opacity: 0, y: 25 },
-          v2: { opacity: 0, y: 25 },
-          v3: { opacity: 0, y: 25 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 0,
-          v2Words: 0,
-          v3Words: 0,
-          v4Words: 0,
-          v1En: 0,
-          v2En: 0,
-          v3En: 0,
-          v4En: 0,
-          verseNum: ''
-        };
-        case 2: return {
-          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
-          q: { x: pos.cx, y: pos.cy, scale: 1, opacity: 1 },
-          v1: { opacity: 0, y: 25 },
-          v2: { opacity: 0, y: 25 },
-          v3: { opacity: 0, y: 25 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 0,
-          v2Words: 0,
-          v3Words: 0,
-          v4Words: 0,
-          v1En: 0,
-          v2En: 0,
-          v3En: 0,
-          v4En: 0,
-          verseNum: ''
-        };
-        case 3: return {
-          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
-          q: { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 },
-          v1: { opacity: 1, y: 0 },
-          v2: { opacity: 0, y: 25 },
-          v3: { opacity: 0, y: 25 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 1, // All visible
-          v2Words: 0,
-          v3Words: 0,
-          v4Words: 0,
-          v1En: 1,
-          v2En: 0,
-          v3En: 0,
-          v4En: 0,
-          verseNum: '1:1'
-        };
-        case 4: return {
-          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
-          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 },
-          v1: { opacity: 0, y: -15 },
-          v2: { opacity: 1, y: 0 },
-          v3: { opacity: 0, y: 25 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 0,
-          v2Words: 1, // All visible
-          v3Words: 0,
-          v4Words: 0,
-          v1En: 0,
-          v2En: 1,
-          v3En: 0,
-          v4En: 0,
-          verseNum: '1:2'
-        };
-        case 5: return {
-          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
-          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 },
-          v1: { opacity: 0, y: -15 },
-          v2: { opacity: 0, y: -15 },
-          v3: { opacity: 1, y: 0 },
-          v4: { opacity: 0, y: 25 },
-          v1Words: 0,
-          v2Words: 0,
-          v3Words: 1, // All visible
-          v4Words: 0,
-          v1En: 0,
-          v2En: 0,
-          v3En: 1,
-          v4En: 0,
-          verseNum: '1:3'
-        };
-        case 6: return {
-          en: { x: pos.cx, y: pos.cy - 75, opacity: 0 },
-          q: { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 },
-          v1: { opacity: 0, y: -15 },
-          v2: { opacity: 0, y: -15 },
-          v3: { opacity: 0, y: -15 },
-          v4: { opacity: 1, y: 0 },
-          v1Words: 0,
-          v2Words: 0,
-          v3Words: 0,
-          v4Words: 1, // All visible
-          v1En: 0,
-          v2En: 0,
-          v3En: 0,
-          v4En: 1,
-          verseNum: '1:4'
-        };
+      // Generate verse states (none active for intro anchors)
+      const activeVerse = anchor >= INTRO_ANCHORS ? anchor - INTRO_ANCHORS : -1;
+      const { v, vWords, vEn } = generateVerseStates(activeVerse);
+
+      // Base state with verse data
+      const state = { v, vWords, vEn, verseNum: '' };
+
+      // Intro states (0, 1, 2) - unique configurations
+      if (anchor === 0) {
+        // Title only
+        state.en = { x: pos.cx, y: pos.cy, opacity: 1 };
+        state.q = { x: pos.cx, y: pos.cy + 70, scale: 1, opacity: 0 };
+      } else if (anchor === 1) {
+        // Title + Qohelet appearing
+        state.en = { x: pos.cx, y: pos.cy - 50, opacity: 1 };
+        state.q = { x: pos.cx, y: pos.cy + 40, scale: 1, opacity: 1 };
+      } else if (anchor === 2) {
+        // Qohelet alone, centered
+        state.en = { x: pos.cx, y: pos.cy - 75, opacity: 0 };
+        state.q = { x: pos.cx, y: pos.cy, scale: 1, opacity: 1 };
+      } else {
+        // Verse states (anchor >= 3)
+        state.en = { x: pos.cx, y: pos.cy - 75, opacity: 0 };
+
+        // Qohelet positioning based on which verse is active
+        if (activeVerse === 0) {
+          // Verse 1: Qohelet floats into slot 1 (placeholder in verse 1)
+          state.q = { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 };
+        } else if (activeVerse === 1) {
+          // Verse 2: Qohelet floats into slot 2 (placeholder in verse 2)
+          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 };
+        } else {
+          // Verse 3+: Qohelet fades out (stays at last position)
+          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 };
+        }
+
+        // Set verse reference
+        state.verseNum = verses[activeVerse].ref;
       }
+
+      return state;
     }
     
     // ===== INTERPOLATED STATES =====
     // Only used when between anchors
-    
+
     function lerp(a, b, t) { return a + (b - a) * t; }
-    
+
     function lerpState(s1, s2, t) {
       const e = ease(t);
+
+      // Interpolate verse states dynamically
+      const v = {};
+      const vWords = {};
+      const vEn = {};
+
+      verses.forEach((_, i) => {
+        v[i] = {
+          opacity: lerp(s1.v[i].opacity, s2.v[i].opacity, e),
+          y: lerp(s1.v[i].y, s2.v[i].y, e)
+        };
+        vWords[i] = lerp(s1.vWords[i], s2.vWords[i], e);
+        vEn[i] = lerp(s1.vEn[i], s2.vEn[i], e);
+      });
+
       return {
         en: {
           x: lerp(s1.en.x, s2.en.x, e),
@@ -1320,30 +1273,9 @@
           scale: lerp(s1.q.scale, s2.q.scale, e),
           opacity: lerp(s1.q.opacity, s2.q.opacity, e)
         },
-        v1: {
-          opacity: lerp(s1.v1.opacity, s2.v1.opacity, e),
-          y: lerp(s1.v1.y, s2.v1.y, e)
-        },
-        v2: {
-          opacity: lerp(s1.v2.opacity, s2.v2.opacity, e),
-          y: lerp(s1.v2.y, s2.v2.y, e)
-        },
-        v3: {
-          opacity: lerp(s1.v3.opacity, s2.v3.opacity, e),
-          y: lerp(s1.v3.y, s2.v3.y, e)
-        },
-        v4: {
-          opacity: lerp(s1.v4.opacity, s2.v4.opacity, e),
-          y: lerp(s1.v4.y, s2.v4.y, e)
-        },
-        v1Words: lerp(s1.v1Words, s2.v1Words, e),
-        v2Words: lerp(s1.v2Words, s2.v2Words, e),
-        v3Words: lerp(s1.v3Words, s2.v3Words, e),
-        v4Words: lerp(s1.v4Words, s2.v4Words, e),
-        v1En: lerp(s1.v1En, s2.v1En, e),
-        v2En: lerp(s1.v2En, s2.v2En, e),
-        v3En: lerp(s1.v3En, s2.v3En, e),
-        v4En: lerp(s1.v4En, s2.v4En, e),
+        v,
+        vWords,
+        vEn,
         verseNum: e > 0.5 ? s2.verseNum : s1.verseNum
       };
     }
@@ -1400,70 +1332,26 @@
       qohelet.style.opacity = state.q.opacity;
       qohelet.style.pointerEvents = state.q.opacity > 0.5 ? 'auto' : 'none';
       
-      // Verse 1
-      verse1.style.opacity = state.v1.opacity;
-      verse1.style.transform = `translateY(${state.v1.y}px)`;
-      verse1.style.pointerEvents = state.v1.opacity > 0.2 ? 'auto' : 'none';
-      
-      // V1 words - stagger based on state.v1Words (0 to 1)
-      // Formula ensures all words reach 1 when v1Words = 1
-      v1Words.forEach((w, i) => {
-        const progress = state.v1Words * (v1Words.length + 1);
-        const wordT = Math.max(0, Math.min(1, progress - i));
-        w.style.opacity = wordT;
-        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+      // Render all verses with single loop
+      verses.forEach((verse, i) => {
+        const vState = state.v[i];
+
+        // Verse container
+        verse.el.style.opacity = vState.opacity;
+        verse.el.style.transform = `translateY(${vState.y}px)`;
+        verse.el.style.pointerEvents = vState.opacity > 0.2 ? 'auto' : 'none';
+
+        // Hebrew words - staggered reveal based on vWords (0 to 1)
+        const wordProgress = state.vWords[i] * (verse.words.length + 1);
+        verse.words.forEach((w, wi) => {
+          const wordT = Math.max(0, Math.min(1, wordProgress - wi));
+          w.style.opacity = wordT;
+          w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+        });
+
+        // English translation
+        verse.en.style.opacity = state.vEn[i];
       });
-      
-      // V1 English
-      verse1En.style.opacity = state.v1En;
-      
-      // Verse 2
-      verse2.style.opacity = state.v2.opacity;
-      verse2.style.transform = `translateY(${state.v2.y}px)`;
-      verse2.style.pointerEvents = state.v2.opacity > 0.2 ? 'auto' : 'none';
-      
-      // V2 words
-      v2Words.forEach((w, i) => {
-        const progress = state.v2Words * (v2Words.length + 1);
-        const wordT = Math.max(0, Math.min(1, progress - i));
-        w.style.opacity = wordT;
-        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
-      });
-
-      // V2 English
-      verse2En.style.opacity = state.v2En;
-
-      // Verse 3
-      verse3.style.opacity = state.v3.opacity;
-      verse3.style.transform = `translateY(${state.v3.y}px)`;
-      verse3.style.pointerEvents = state.v3.opacity > 0.2 ? 'auto' : 'none';
-
-      // V3 words
-      v3Words.forEach((w, i) => {
-        const progress = state.v3Words * (v3Words.length + 1);
-        const wordT = Math.max(0, Math.min(1, progress - i));
-        w.style.opacity = wordT;
-        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
-      });
-
-      // V3 English
-      verse3En.style.opacity = state.v3En;
-
-      // Verse 4
-      verse4.style.opacity = state.v4.opacity;
-      verse4.style.transform = `translateY(${state.v4.y}px)`;
-      verse4.style.pointerEvents = state.v4.opacity > 0.2 ? 'auto' : 'none';
-
-      // V4 words
-      v4Words.forEach((w, i) => {
-        const progress = state.v4Words * (v4Words.length + 1);
-        const wordT = Math.max(0, Math.min(1, progress - i));
-        w.style.opacity = wordT;
-        w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
-      });
-
-      // V4 English
-      verse4En.style.opacity = state.v4En;
 
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
@@ -1625,9 +1513,11 @@
       const s = getAnchorState(0);
       titleEn.style.opacity = s.en.opacity;
       qohelet.style.opacity = s.q.opacity;
-      verse1.style.opacity = s.v1.opacity;
-      verse2.style.opacity = s.v2.opacity;
-      verse3.style.opacity = s.v3.opacity;
+
+      // Apply initial state to all verses dynamically
+      verses.forEach((verse, i) => {
+        verse.el.style.opacity = s.v[i].opacity;
+      });
 
       requestAnimationFrame(render);
     }
