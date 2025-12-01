@@ -252,7 +252,7 @@
       right: clamp(20px, 3vw, 40px);
       display: flex;
       align-items: center;
-      gap: 0.5em;
+      gap: 0.4em;
       font-size: clamp(14px, 2vw, 22px);
       color: rgba(245, 242, 235, 0.7);
       font-weight: 400;
@@ -261,46 +261,46 @@
       user-select: none;
     }
 
-    .verse-num-current {
+    .verse-num-option {
+      padding: 8px 10px;
+      margin: -8px 0;
+      border-radius: 6px;
       cursor: pointer;
-      padding: 8px 12px;
-      margin: -8px -12px;
-      border-radius: 8px;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: opacity 0.25s ease, color 0.15s ease, background 0.15s ease, transform 0.25s ease;
+      opacity: 0;
+      transform: scale(0.9);
+      pointer-events: none;
+      position: absolute;
+      right: 0;
     }
 
-    .verse-num-current:hover {
+    .verse-num-option.current {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+      position: relative;
+      color: rgba(245, 242, 235, 0.7);
+    }
+
+    .verse-num-option.current:hover {
       background: rgba(218, 165, 32, 0.1);
       color: var(--cream);
     }
 
-    .verse-num-selector {
-      display: flex;
-      gap: 0.3em;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-
-    .verse-num-selector.visible {
+    .verse-num.open .verse-num-option {
       opacity: 1;
+      transform: scale(1);
       pointer-events: auto;
-    }
-
-    .verse-num-option {
-      padding: 8px 10px;
-      border-radius: 6px;
-      cursor: pointer;
+      position: relative;
       color: rgba(245, 242, 235, 0.5);
-      transition: background 0.15s ease, color 0.15s ease;
     }
 
-    .verse-num-option:hover {
+    .verse-num.open .verse-num-option:hover {
       background: rgba(218, 165, 32, 0.15);
       color: var(--cream);
     }
 
-    .verse-num-option.active {
+    .verse-num.open .verse-num-option.current {
       color: var(--gold);
     }
 
@@ -647,8 +647,7 @@
   
   <div class="progress" id="progress"></div>
   <div class="verse-num" id="verseNum">
-    <span class="verse-num-current" id="verseNumCurrent"></span>
-    <div class="verse-num-selector" id="verseNumSelector"></div>
+    <!-- Verse options built dynamically -->
   </div>
 
   <div class="word-tooltip" id="wordTooltip">
@@ -1137,36 +1136,38 @@
     }
 
     // ===== VERSE SELECTOR =====
-    const verseNumCurrent = $('verseNumCurrent');
-    const verseNumSelector = $('verseNumSelector');
     let selectorOpen = false;
 
     function buildVerseSelector() {
-      verseNumSelector.innerHTML = '';
+      verseNum.innerHTML = '';
       verses.forEach((verse, i) => {
         const option = document.createElement('span');
         option.className = 'verse-num-option';
-        option.textContent = i + 1;
+        option.textContent = verse.ref;
+        option.dataset.index = i;
         option.addEventListener('click', e => {
           e.stopPropagation();
-          navigateToVerse(i);
-          closeSelector();
+          if (selectorOpen) {
+            navigateToVerse(i);
+            closeSelector();
+          } else {
+            openSelector();
+          }
         });
-        verseNumSelector.appendChild(option);
+        verseNum.appendChild(option);
       });
     }
 
     function openSelector() {
       if (selectorOpen) return;
       selectorOpen = true;
-      verseNumSelector.classList.add('visible');
-      updateSelectorHighlight();
+      verseNum.classList.add('open');
     }
 
     function closeSelector() {
       if (!selectorOpen) return;
       selectorOpen = false;
-      verseNumSelector.classList.remove('visible');
+      verseNum.classList.remove('open');
     }
 
     function toggleSelector() {
@@ -1176,9 +1177,9 @@
 
     function updateSelectorHighlight() {
       const currentVerse = Math.max(0, Math.round(timeline.value) - INTRO_ANCHORS);
-      const options = verseNumSelector.querySelectorAll('.verse-num-option');
+      const options = verseNum.querySelectorAll('.verse-num-option');
       options.forEach((opt, i) => {
-        opt.classList.toggle('active', i === currentVerse && timeline.value >= INTRO_ANCHORS);
+        opt.classList.toggle('current', i === currentVerse && timeline.value >= INTRO_ANCHORS);
       });
     }
 
@@ -1399,12 +1400,9 @@
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
 
-      // Verse number
-      verseNumCurrent.textContent = state.verseNum;
+      // Verse selector - update current highlight and visibility
       verseNum.style.opacity = state.verseNum ? 1 : 0;
-
-      // Update selector highlight if open
-      if (selectorOpen) updateSelectorHighlight();
+      updateSelectorHighlight();
 
       // Update navigation hints
       updateHints(p);
@@ -1572,12 +1570,6 @@
       // Apply initial state to all verses
       verses.forEach((verse, i) => {
         verse.el.style.opacity = s.v[i].opacity;
-      });
-
-      // Verse number click to toggle selector
-      verseNumCurrent.addEventListener('click', e => {
-        e.stopPropagation();
-        toggleSelector();
       });
 
       // Close selector when clicking outside
