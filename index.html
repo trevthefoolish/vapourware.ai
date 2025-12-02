@@ -367,6 +367,68 @@
       50% { opacity: 1; }
     }
 
+    /* ===== NEW CONTENT INDICATORS ===== */
+    .verse-num.has-new {
+      animation: selectorPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes selectorPulse {
+      0%, 100% {
+        color: rgba(245, 242, 235, 0.7);
+      }
+      50% {
+        color: var(--gold);
+        text-shadow: 0 0 12px rgba(218, 165, 32, 0.4);
+      }
+    }
+
+    .new-verse-indicator {
+      position: fixed;
+      top: clamp(20px, 3vw, 40px);
+      right: clamp(70px, 8vw, 100px);
+      font-size: clamp(11px, 1.5vw, 14px);
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 400;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .new-verse-indicator.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .new-verse-indicator.hiding {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    /* Progress bar new portion */
+    .progress-new {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom, 0);
+      height: clamp(3px, 0.4vw, 5px);
+      background: linear-gradient(90deg, rgba(240, 208, 96, 0.9), rgba(255, 223, 128, 1));
+      box-shadow: 0 0 16px rgba(240, 208, 96, 0.6), 0 0 24px rgba(218, 165, 32, 0.3);
+      animation: progressNewPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes progressNewPulse {
+      0%, 100% {
+        opacity: 0.8;
+        box-shadow: 0 0 12px rgba(240, 208, 96, 0.4);
+      }
+      50% {
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(240, 208, 96, 0.7), 0 0 30px rgba(218, 165, 32, 0.4);
+      }
+    }
+
     /* ===== WORD TOOLTIP - Floating Glassmorphism ===== */
     .word-tooltip {
       position: fixed;
@@ -654,6 +716,7 @@
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
   
   <div class="progress" id="progress"></div>
+  <div class="progress-new" id="progressNew"></div>
   <div class="verse-num" id="verseNum">
     <!-- Verse options built dynamically -->
   </div>
@@ -674,8 +737,35 @@
     <span class="tap-hint-text">Tap the word to explore</span>
   </div>
 
+  <div class="new-verse-indicator" id="newVerseIndicator">New verse</div>
+
 
   <script>
+    // ===== PERSISTENCE =====
+    const STORAGE_KEY = 'vapourware_state';
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveState(position, verseCount, hintsShown) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          position: Math.round(position),
+          verseCount,
+          hintsShown,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        // Storage unavailable, silently fail
+      }
+    }
+
     // ===== ELEMENTS =====
     const $ = id => document.getElementById(id);
     const titleEn = $('titleEn');
@@ -701,6 +791,8 @@
     const tooltipTidbit = $('tooltipTidbit');
     const scrollHint = $('scrollHint');
     const tapHint = $('tapHint');
+    const progressNew = $('progressNew');
+    const newVerseIndicator = $('newVerseIndicator');
 
     // ===== WORD DATA =====
     // Transliterations and contextual tidbits for each Hebrew word
@@ -1435,6 +1527,9 @@
       // Progress
       progress.style.width = (p / MAX * 100) + '%';
 
+      // New content progress overlay
+      updateNewContentProgress(p);
+
       // Verse selector - update current highlight and visibility
       verseNum.style.opacity = state.verseNum ? 1 : 0;
       updateSelectorHighlight();
@@ -1449,6 +1544,58 @@
     let scrollHintHidden = false;
     let tapHintVisible = false;
     let tapHintHidden = false;
+
+    // ===== NEW CONTENT DETECTION =====
+    let hasNewContent = false;
+    let newContentSeen = false;
+    let savedVerseCount = 0;
+
+    function showNewContentIndicators() {
+      if (!hasNewContent || newContentSeen) return;
+
+      // Pulse on verse selector
+      verseNum.classList.add('has-new');
+
+      // Show "New verse" text
+      newVerseIndicator.classList.add('visible');
+    }
+
+    function hideNewContentIndicators() {
+      if (newContentSeen) return;
+      newContentSeen = true;
+
+      // Remove pulse from selector
+      verseNum.classList.remove('has-new');
+
+      // Fade out indicator
+      newVerseIndicator.classList.remove('visible');
+      newVerseIndicator.classList.add('hiding');
+
+      // Save updated state - user has now seen all verses
+      saveState(timeline.target, VERSE_COUNT, scrollHintHidden || tapHintHidden);
+    }
+
+    function updateNewContentProgress(p) {
+      if (!hasNewContent || newContentSeen) {
+        progressNew.style.width = '0';
+        return;
+      }
+
+      // Calculate the "new" portion of the progress bar
+      // savedVerseCount is the old count, VERSE_COUNT is current
+      // New content starts at anchor (INTRO_ANCHORS + savedVerseCount - 1)
+      const oldMax = INTRO_ANCHORS + savedVerseCount - 1;
+      const newStart = (oldMax / MAX) * 100;
+      const currentProgress = (p / MAX) * 100;
+
+      progressNew.style.left = newStart + '%';
+      progressNew.style.width = (100 - newStart) + '%';
+
+      // When user reaches new content, mark as seen
+      if (p >= oldMax + 0.5) {
+        hideNewContentIndicators();
+      }
+    }
 
     function hideScrollHint() {
       if (!scrollHintHidden) {
@@ -1612,6 +1759,29 @@
       buildVerseSelector();
       startTime = Date.now();
 
+      // Load saved state
+      const saved = loadState();
+      let restorePosition = 0;
+
+      if (saved) {
+        // Check for new content
+        savedVerseCount = saved.verseCount || 0;
+        if (VERSE_COUNT > savedVerseCount && savedVerseCount > 0) {
+          hasNewContent = true;
+        }
+
+        // Restore hint state
+        if (saved.hintsShown) {
+          scrollHintHidden = true;
+          scrollHint.style.display = 'none';
+          tapHintHidden = true;
+          tapHint.style.display = 'none';
+        }
+
+        // Remember where to return to (clamped to valid range)
+        restorePosition = Math.min(saved.position || 0, MAX);
+      }
+
       timeline.snap(0);
 
       // Apply initial state
@@ -1632,6 +1802,31 @@
       });
 
       requestAnimationFrame(render);
+
+      // Gentle return: after a moment at the title, animate to saved position
+      if (restorePosition > 0) {
+        setTimeout(() => {
+          timeline.set(restorePosition);
+
+          // Show new content indicators after animation begins
+          if (hasNewContent) {
+            setTimeout(showNewContentIndicators, 800);
+          }
+        }, 1200);
+      } else if (hasNewContent) {
+        // First-time visitor with somehow detected new content (edge case)
+        setTimeout(showNewContentIndicators, 2000);
+      }
+
+      // Save state periodically when at rest
+      let lastSavedPosition = -1;
+      setInterval(() => {
+        const currentPos = Math.round(timeline.value);
+        if (Math.abs(timeline.velocity) < 0.01 && currentPos !== lastSavedPosition) {
+          lastSavedPosition = currentPos;
+          saveState(currentPos, VERSE_COUNT, scrollHintHidden || tapHintHidden);
+        }
+      }, 2000);
     }
     
     document.fonts.ready.then(init);
