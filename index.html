@@ -5,22 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ecclesiastes 1:1-4</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css">
   <style>
     :root {
-      /* Core palette */
       --gold: #daa520;
       --gold-lit: #f0d060;
       --cream: #f5f2eb;
       --cream-dim: rgba(245, 242, 235, 0.68);
       --bg: #0a0a0a;
-
-      /* Typography - single source of truth, scales fluidly across all devices */
       --font-title-en: clamp(24px, 4vw, 48px);
       --font-title-he: clamp(50px, 10vw, 120px);
       --font-word-he: clamp(30px, 5.5vw, 56px);
       --font-word-en: clamp(20px, 3vw, 36px);
-
-      /* Spacing */
       --word-padding: 0.2em 0.35em;
     }
 
@@ -33,26 +30,40 @@
       font-family: 'Cormorant Garamond', serif;
     }
 
-    .scene {
-      position: fixed;
-      inset: 0;
+    /* Swiper container */
+    .swiper {
+      width: 100%;
+      height: 100%;
+    }
+
+    .swiper-slide {
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* ===== ENGLISH TITLE ===== */
+    /* Progress bar (Swiper handles updates) */
+    .swiper-pagination-progressbar {
+      background: transparent !important;
+      bottom: env(safe-area-inset-bottom, 0) !important;
+      top: auto !important;
+      height: clamp(3px, 0.4vw, 5px) !important;
+    }
+
+    .swiper-pagination-progressbar-fill {
+      background: linear-gradient(90deg, rgba(218, 165, 32, 0.7), rgba(240, 208, 96, 0.85)) !important;
+      box-shadow: 0 0 12px rgba(218, 165, 32, 0.4);
+    }
+
+    /* ===== TITLES ===== */
     .title-en {
-      position: absolute;
       font-size: var(--font-title-en);
       font-weight: 300;
       color: var(--cream);
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      will-change: transform, opacity;
     }
 
-    /* ===== HEBREW TITLE (קֹהֶלֶת) ===== */
     .title-he {
       position: fixed;
       font-size: var(--font-title-he);
@@ -60,29 +71,22 @@
       color: var(--gold);
       direction: rtl;
       z-index: 100;
-      will-change: transform, opacity;
-      transform-origin: center center;
       padding: var(--word-padding);
       cursor: pointer;
       -webkit-user-select: none;
-      -webkit-touch-callout: none;
       user-select: none;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
     }
 
     /* ===== VERSES ===== */
     .verse {
-      position: absolute;
       display: flex;
       flex-direction: column;
       align-items: center;
       max-width: min(90vw, 900px);
-      will-change: transform, opacity;
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .verse.active {
-      visibility: visible;
     }
 
     .verse-he {
@@ -104,12 +108,10 @@
       margin-top: 1.1em;
       text-align: center;
       color: var(--cream-dim);
-      will-change: opacity;
       letter-spacing: 0.03em;
-      opacity: 0;
     }
 
-    /* ===== HEBREW WORDS ===== */
+    /* ===== WORDS ===== */
     .word-he {
       font-size: var(--font-word-he);
       font-weight: 400;
@@ -117,99 +119,19 @@
       padding: var(--word-padding);
       cursor: pointer;
       transition: color 0.25s ease, text-shadow 0.25s ease;
-      will-change: transform, opacity;
       -webkit-user-select: none;
-      -webkit-touch-callout: none;
       user-select: none;
-      opacity: 0;
     }
 
-    /* ===== ENGLISH WORDS ===== */
     .word-en {
       color: var(--cream-dim);
       padding: 0.1em 0.15em;
       cursor: pointer;
       transition: color 0.25s ease, text-shadow 0.25s ease;
       -webkit-user-select: none;
-      -webkit-touch-callout: none;
       user-select: none;
     }
 
-    /* ===== CONSOLIDATED LIT STATES ===== */
-    [data-link].lit,
-    [data-link].lit-stagger {
-      --lit-color: var(--gold-lit);
-      --glow-1: 0 0 20px rgba(218, 165, 32, 0.6);
-      --glow-2: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
-      --glow-bright: 1.1;
-      color: var(--lit-color);
-      text-shadow: var(--glow-1);
-      animation: glowPulse 2.5s ease-in-out infinite;
-    }
-
-    .word-en.lit,
-    .word-en.lit-stagger {
-      --lit-color: #fff;
-      --glow-1: 0 0 15px rgba(255, 255, 255, 0.5);
-      --glow-2: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
-      --glow-bright: 1.1;
-    }
-
-    .title-he.lit {
-      --glow-1: 0 0 25px rgba(218, 165, 32, 0.6);
-      --glow-2: 0 0 40px rgba(218, 165, 32, 0.85), 0 0 70px rgba(218, 165, 32, 0.35);
-      --glow-bright: 1.12;
-    }
-
-    [data-link].lit-stagger {
-      --reveal-peak: 0 0 35px rgba(218, 165, 32, 0.9);
-      animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                 glowPulse 2.5s ease-in-out 0.4s infinite;
-    }
-
-    .word-en.lit-stagger {
-      --reveal-peak: 0 0 25px rgba(255, 255, 255, 0.8);
-    }
-
-    [data-link].touch-active {
-      transform: scale(0.95);
-      transition: transform 0.1s ease-out;
-    }
-
-    .title-he.touch-active {
-      transform: translate(-50%, -50%) scale(0.97);
-      transition: transform 0.1s ease-out;
-    }
-
-    @keyframes glowPulse {
-      0%, 100% {
-        text-shadow: var(--glow-1);
-        filter: brightness(1);
-      }
-      50% {
-        text-shadow: var(--glow-2);
-        filter: brightness(var(--glow-bright));
-      }
-    }
-
-    @keyframes wordReveal {
-      0% {
-        opacity: 0.5;
-        transform: scale(0.92);
-        text-shadow: 0 0 0 transparent;
-      }
-      60% {
-        transform: scale(1.05);
-        text-shadow: var(--reveal-peak);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-        text-shadow: var(--glow-1);
-      }
-    }
-
-    /* ===== PLACEHOLDER ===== */
     .placeholder {
       font-size: var(--font-word-he);
       font-weight: 400;
@@ -217,71 +139,101 @@
       padding: var(--word-padding);
     }
 
-    /* ===== UI ===== */
-    .progress {
-      position: fixed;
-      bottom: env(safe-area-inset-bottom, 0);
-      left: 0;
-      width: 0%;
-      height: clamp(3px, 0.4vw, 5px);
-      background: linear-gradient(90deg, rgba(218, 165, 32, 0.7), rgba(240, 208, 96, 0.85));
-      box-shadow: 0 0 12px rgba(218, 165, 32, 0.4);
+    /* ===== HIGHLIGHTING ===== */
+    [data-tippy-content].lit {
+      --glow: 0 0 20px rgba(218, 165, 32, 0.6);
+      color: var(--gold-lit);
+      text-shadow: var(--glow);
+      animation: glowPulse 2.5s ease-in-out infinite;
     }
 
-    .verse-num {
+    .word-en.lit {
+      --glow: 0 0 15px rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
+
+    .title-he.lit {
+      --glow: 0 0 25px rgba(218, 165, 32, 0.6);
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: var(--glow); filter: brightness(1); }
+      50% { text-shadow: var(--glow), var(--glow); filter: brightness(1.1); }
+    }
+
+    /* ===== TIPPY THEME ===== */
+    .tippy-box[data-theme~='ecclesiastes'] {
+      background: rgba(10, 8, 6, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(218, 165, 32, 0.25);
+      border-radius: clamp(12px, 1.5vw, 16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 80px rgba(218, 165, 32, 0.08);
+      max-width: min(400px, 85vw) !important;
+      padding: clamp(16px, 2vw, 24px) clamp(20px, 2.5vw, 32px);
+    }
+
+    .tippy-box[data-theme~='ecclesiastes'] .tippy-arrow { display: none; }
+
+    .tooltip-hebrew {
+      font-size: clamp(22px, 4vw, 34px);
+      color: var(--gold);
+      direction: rtl;
+      text-align: center;
+      margin-bottom: clamp(6px, 1vw, 10px);
+      font-weight: 500;
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+    }
+
+    .tooltip-translit {
+      font-size: clamp(14px, 2.5vw, 20px);
+      color: var(--cream);
+      text-align: center;
+      font-style: italic;
+      letter-spacing: 0.05em;
+      margin-bottom: clamp(10px, 1.5vw, 14px);
+      padding-bottom: clamp(10px, 1.5vw, 14px);
+      border-bottom: 1px solid rgba(218, 165, 32, 0.25);
+    }
+
+    .tooltip-tidbit {
+      font-size: clamp(13px, 2vw, 18px);
+      color: rgba(232, 228, 220, 0.85);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ===== VERSE SELECTOR ===== */
+    .verse-nav {
       position: fixed;
       top: clamp(20px, 3vw, 40px);
       right: clamp(20px, 3vw, 40px);
       display: flex;
-      align-items: center;
+      gap: 8px;
       font-size: clamp(14px, 2vw, 22px);
-      color: rgba(245, 242, 235, 0.7);
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      -webkit-user-select: none;
-      user-select: none;
-      opacity: 0;
-    }
-
-    .verse-num-option {
-      padding: 8px 0;
-      border-radius: 6px;
-      cursor: pointer;
-      overflow: hidden;
-      max-width: 0;
-      opacity: 0;
-      transition: max-width 0.3s ease, opacity 0.2s ease, padding 0.3s ease, color 0.15s ease, background 0.15s ease;
-    }
-
-    .verse-num-option.current {
-      max-width: 4em;
-      opacity: 1;
-      padding: 8px 10px;
-      color: rgba(245, 242, 235, 0.7);
-    }
-
-    .verse-num-option.current:hover {
-      background: rgba(218, 165, 32, 0.1);
-      color: var(--cream);
-    }
-
-    .verse-num.open .verse-num-option {
-      max-width: 4em;
-      opacity: 1;
-      padding: 8px 10px;
       color: rgba(245, 242, 235, 0.5);
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
-    .verse-num.open .verse-num-option:hover {
+    .verse-nav.visible { opacity: 1; }
+
+    .verse-nav span {
+      cursor: pointer;
+      padding: 8px 10px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .verse-nav span:hover {
       background: rgba(218, 165, 32, 0.15);
       color: var(--cream);
     }
 
-    .verse-num.open .verse-num-option.current {
-      color: var(--gold);
-    }
+    .verse-nav span.active { color: var(--gold); }
 
-    /* ===== NAVIGATION AFFORDANCE ===== */
+    /* ===== HINTS ===== */
     .scroll-hint {
       position: fixed;
       bottom: calc(28px + env(safe-area-inset-bottom, 0px));
@@ -292,7 +244,7 @@
       align-items: center;
       gap: 6px;
       opacity: 0;
-      animation: scrollHintFadeIn 1.5s ease 2s forwards;
+      animation: fadeIn 1.5s ease 2s forwards;
       pointer-events: none;
       z-index: 50;
     }
@@ -311,742 +263,248 @@
       border-right: 2px solid rgba(218, 165, 32, 0.5);
       border-bottom: 2px solid rgba(218, 165, 32, 0.5);
       transform: rotate(45deg);
-      animation: chevronBounce 1.5s ease-in-out infinite;
+      animation: bounce 1.5s ease-in-out infinite;
     }
 
-    @keyframes scrollHintFadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-
-    @keyframes chevronBounce {
+    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes bounce {
       0%, 100% { transform: rotate(45deg) translateY(0); }
       50% { transform: rotate(45deg) translateY(4px); }
-    }
-
-    /* ===== TAP HINT ===== */
-    .tap-hint {
-      position: fixed;
-      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 50;
-    }
-
-    .tap-hint-text {
-      font-size: clamp(12px, 1.5vw, 16px);
-      color: rgba(218, 165, 32, 0.6);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-weight: 300;
-      animation: tapHintPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes tapHintPulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-
-    /* ===== WORD TOOLTIP ===== */
-    .word-tooltip {
-      position: fixed;
-      z-index: 200;
-      background: rgba(10, 8, 6, 0.65);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(218, 165, 32, 0.2);
-      border-radius: clamp(12px, 1.5vw, 16px);
-      padding: clamp(16px, 2vw, 24px) clamp(20px, 2.5vw, 32px);
-      max-width: min(400px, 85vw);
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 80px rgba(218, 165, 32, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      -webkit-user-select: none;
-      user-select: none;
-      will-change: transform, opacity;
-    }
-
-    .word-tooltip.visible {
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    /* Tooltip border shimmer effect */
-    .word-tooltip::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 13px;
-      padding: 1px;
-      background: linear-gradient(
-        135deg,
-        rgba(218, 165, 32, 0.4) 0%,
-        rgba(218, 165, 32, 0.1) 40%,
-        rgba(218, 165, 32, 0.1) 60%,
-        rgba(218, 165, 32, 0.4) 100%
-      );
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      opacity: 0;
-      animation: borderShimmer 3s ease-in-out infinite;
-    }
-
-    .word-tooltip.visible::before {
-      opacity: 1;
-    }
-
-    @keyframes borderShimmer {
-      0%, 100% {
-        background-position: 0% 0%;
-        opacity: 0.5;
-      }
-      50% {
-        background-position: 100% 100%;
-        opacity: 1;
-      }
-    }
-
-    .word-tooltip-hebrew {
-      font-size: clamp(22px, 4vw, 34px);
-      color: var(--gold);
-      direction: rtl;
-      text-align: center;
-      margin-bottom: clamp(6px, 1vw, 10px);
-      font-weight: 500;
-      text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
-    }
-
-    .word-tooltip-transliteration {
-      font-size: clamp(14px, 2.5vw, 20px);
-      color: var(--cream);
-      text-align: center;
-      font-style: italic;
-      font-weight: 400;
-      letter-spacing: 0.05em;
-      margin-bottom: clamp(10px, 1.5vw, 14px);
-      padding-bottom: clamp(10px, 1.5vw, 14px);
-      border-bottom: 1px solid rgba(218, 165, 32, 0.25);
-    }
-
-    .word-tooltip-tidbit {
-      font-size: clamp(13px, 2vw, 18px);
-      color: rgba(232, 228, 220, 0.85);
-      line-height: 1.6;
-      text-align: left;
-      font-weight: 300;
     }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="title-en" id="titleEn">Ecclesiastes</div>
-
-    <div class="verse" id="verse1">
-      <div class="verse-he">
-        <span class="word-he" data-link="words">דִּבְרֵי</span>
-        <span class="placeholder" id="ph1">קֹהֶלֶת</span>
-        <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
-        <span class="word-he" data-link="king">מֶלֶךְ</span>
-        <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <!-- Slide 0: Title only -->
+      <div class="swiper-slide">
+        <div class="title-en">Ecclesiastes</div>
       </div>
-      <div class="verse-en" id="verse1En">The <span class="word-en" data-link="words">words</span> of the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="son">son of David</span>, <span class="word-en" data-link="king">king</span> in <span class="word-en" data-link="jerusalem">Jerusalem</span></div>
-    </div>
 
-    <div class="verse" id="verse2">
-      <div class="verse-he">
-        <span class="word-he" data-link="vanity">הֲבֵל</span>
-        <span class="word-he" data-link="vanity">הֲבָלִים</span>
-        <span class="word-he" data-link="says">אָמַר</span>
-        <span class="placeholder" id="ph2">קֹהֶלֶת</span>
-        <span class="word-he" data-link="vanity">הֲבֵל</span>
-        <span class="word-he" data-link="vanity">הֲבָלִים</span>
-        <span class="word-he" data-link="all">הַכֹּל</span>
-        <span class="word-he" data-link="vanity">הָבֶל</span>
+      <!-- Slide 1: Title + Qohelet (handled by choreography) -->
+      <div class="swiper-slide">
+        <div class="title-en" style="transform: translateY(-50px)">Ecclesiastes</div>
       </div>
-      <div class="verse-en" id="verse2En"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
-    </div>
 
-    <div class="verse" id="verse3">
-      <div class="verse-he">
-        <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
-        <span class="word-he" data-link="man">לָאָדָם</span>
-        <span class="word-he" data-link="labor">בְּכָל־עֲמָלוֹ</span>
-        <span class="word-he" data-link="toils">שֶׁיַּעֲמֹל</span>
-        <span class="word-he" data-link="under">תַּחַת</span>
-        <span class="word-he" data-link="sun">הַשָּׁמֶשׁ</span>
-      </div>
-      <div class="verse-en" id="verse3En">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
-    </div>
+      <!-- Slide 2: Qohelet alone (choreography centers it) -->
+      <div class="swiper-slide"></div>
 
-    <div class="verse" id="verse4">
-      <div class="verse-he">
-        <span class="word-he" data-link="generation">דּוֹר</span>
-        <span class="word-he" data-link="goes">הֹלֵךְ</span>
-        <span class="word-he" data-link="generation">וְדוֹר</span>
-        <span class="word-he" data-link="comes">בָּא</span>
-        <span class="word-he" data-link="earth">וְהָאָרֶץ</span>
-        <span class="word-he" data-link="forever">לְעוֹלָם</span>
-        <span class="word-he" data-link="remains">עֹמָדֶת</span>
+      <!-- Slide 3: Verse 1 -->
+      <div class="swiper-slide" data-verse="1">
+        <div class="verse">
+          <div class="verse-he">
+            <span class="word-he" data-link="words">דִּבְרֵי</span>
+            <span class="placeholder" id="ph1">קֹהֶלֶת</span>
+            <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
+            <span class="word-he" data-link="king">מֶלֶךְ</span>
+            <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
+          </div>
+          <div class="verse-en">The <span class="word-en" data-link="words">words</span> of the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="son">son of David</span>, <span class="word-en" data-link="king">king</span> in <span class="word-en" data-link="jerusalem">Jerusalem</span></div>
+        </div>
       </div>
-      <div class="verse-en" id="verse4En">A <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="goes">goes</span>, and a <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="comes">comes</span>, but the <span class="word-en" data-link="earth">earth</span> <span class="word-en" data-link="remains">remains</span> <span class="word-en" data-link="forever">forever</span>.</div>
+
+      <!-- Slide 4: Verse 2 -->
+      <div class="swiper-slide" data-verse="2">
+        <div class="verse">
+          <div class="verse-he">
+            <span class="word-he" data-link="vanity">הֲבֵל</span>
+            <span class="word-he" data-link="vanity">הֲבָלִים</span>
+            <span class="word-he" data-link="says">אָמַר</span>
+            <span class="placeholder" id="ph2">קֹהֶלֶת</span>
+            <span class="word-he" data-link="vanity">הֲבֵל</span>
+            <span class="word-he" data-link="vanity">הֲבָלִים</span>
+            <span class="word-he" data-link="all">הַכֹּל</span>
+            <span class="word-he" data-link="vanity">הָבֶל</span>
+          </div>
+          <div class="verse-en"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Verse 3 -->
+      <div class="swiper-slide" data-verse="3">
+        <div class="verse">
+          <div class="verse-he">
+            <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
+            <span class="word-he" data-link="man">לָאָדָם</span>
+            <span class="word-he" data-link="labor">בְּכָל־עֲמָלוֹ</span>
+            <span class="word-he" data-link="toils">שֶׁיַּעֲמֹל</span>
+            <span class="word-he" data-link="under">תַּחַת</span>
+            <span class="word-he" data-link="sun">הַשָּׁמֶשׁ</span>
+          </div>
+          <div class="verse-en">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
+        </div>
+      </div>
+
+      <!-- Slide 6: Verse 4 -->
+      <div class="swiper-slide" data-verse="4">
+        <div class="verse">
+          <div class="verse-he">
+            <span class="word-he" data-link="generation">דּוֹר</span>
+            <span class="word-he" data-link="goes">הֹלֵךְ</span>
+            <span class="word-he" data-link="generation">וְדוֹר</span>
+            <span class="word-he" data-link="comes">בָּא</span>
+            <span class="word-he" data-link="earth">וְהָאָרֶץ</span>
+            <span class="word-he" data-link="forever">לְעוֹלָם</span>
+            <span class="word-he" data-link="remains">עֹמָדֶת</span>
+          </div>
+          <div class="verse-en">A <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="goes">goes</span>, and a <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="comes">comes</span>, but the <span class="word-en" data-link="earth">earth</span> <span class="word-en" data-link="remains">remains</span> <span class="word-en" data-link="forever">forever</span>.</div>
+        </div>
+      </div>
     </div>
+    <div class="swiper-pagination"></div>
   </div>
 
   <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
 
-  <div class="progress" id="progress"></div>
-  <div class="verse-num" id="verseNum"></div>
-
-  <div class="word-tooltip" id="wordTooltip">
-    <div class="word-tooltip-hebrew" id="tooltipHebrew"></div>
-    <div class="word-tooltip-transliteration" id="tooltipTransliteration"></div>
-    <div class="word-tooltip-tidbit" id="tooltipTidbit"></div>
-  </div>
+  <nav class="verse-nav" id="verseNav">
+    <span data-slide="3">1:1</span>
+    <span data-slide="4">1:2</span>
+    <span data-slide="5">1:3</span>
+    <span data-slide="6">1:4</span>
+  </nav>
 
   <div class="scroll-hint" id="scrollHint">
     <span class="scroll-hint-text">Swipe to explore</span>
     <div class="scroll-hint-chevron"></div>
   </div>
 
-  <div class="tap-hint" id="tapHint">
-    <span class="tap-hint-text">Tap the word to explore</span>
-  </div>
-
-  <!-- GSAP + Observer + Floating UI -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Observer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.3/dist/floating-ui.dom.umd.min.js"></script>
 
   <script>
-    gsap.registerPlugin(Observer);
-    const { computePosition, flip, shift, offset } = FloatingUIDOM;
-
-    // ===== ELEMENTS =====
-    const $ = id => document.getElementById(id);
-    const titleEn = $('titleEn');
-    const qohelet = $('qohelet');
-    const ph1 = $('ph1');
-    const ph2 = $('ph2');
-    const progress = $('progress');
-    const verseNum = $('verseNum');
-    const wordTooltip = $('wordTooltip');
-    const tooltipHebrew = $('tooltipHebrew');
-    const tooltipTransliteration = $('tooltipTransliteration');
-    const tooltipTidbit = $('tooltipTidbit');
-    const scrollHint = $('scrollHint');
-    const tapHint = $('tapHint');
-    const scene = document.querySelector('.scene');
-
-    // ===== VERSE DISCOVERY =====
-    const verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
-      el,
-      en: el.querySelector('.verse-en'),
-      words: [...el.querySelectorAll('.word-he')],
-      ref: `1:${i + 1}`
-    }));
-    const VERSE_COUNT = verses.length;
-    const INTRO_SECTIONS = 3;
-    const TOTAL_SECTIONS = INTRO_SECTIONS + VERSE_COUNT;
-
-    // ===== WORD DATA (loaded async) =====
+    // ===== WORD DATA =====
     let wordData = {};
 
-    // ===== POSITIONS =====
-    let pos = {};
+    // ===== ELEMENTS =====
+    const qohelet = document.getElementById('qohelet');
+    const verseNav = document.getElementById('verseNav');
+    const scrollHint = document.getElementById('scrollHint');
+    const ph1 = document.getElementById('ph1');
+    const ph2 = document.getElementById('ph2');
 
-    function measure() {
-      gsap.set(titleEn, { clearProps: 'all', position: 'absolute', left: '50%', top: '50%', xPercent: -50, yPercent: -50, opacity: 1 });
-      gsap.set(qohelet, { clearProps: 'all', position: 'fixed', left: '50%', top: '50%', xPercent: -50, yPercent: -50, opacity: 1, scale: 1 });
-      verses.forEach(v => {
-        gsap.set(v.el, { clearProps: 'all', position: 'absolute', opacity: 1 });
-        gsap.set(v.words, { clearProps: 'all', opacity: 1 });
-      });
+    // ===== QOHELET CHOREOGRAPHY (the novel part) =====
+    function getQoheletState(index) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
 
-      document.body.offsetHeight;
-
-      const sceneRect = scene.getBoundingClientRect();
-      const ph1R = ph1.getBoundingClientRect();
-      const ph2R = ph2.getBoundingClientRect();
-
-      pos = {
-        cx: sceneRect.left + sceneRect.width / 2,
-        cy: sceneRect.top + sceneRect.height / 2,
-        slot1: { x: ph1R.left + ph1R.width / 2, y: ph1R.top + ph1R.height / 2 },
-        slot2: { x: ph2R.left + ph2R.width / 2, y: ph2R.top + ph2R.height / 2 },
-        scale: parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize)
+      const states = {
+        0: { x: cx, y: cy + 70, scale: 1, opacity: 0 },
+        1: { x: cx, y: cy + 40, scale: 1, opacity: 1 },
+        2: { x: cx, y: cy, scale: 1, opacity: 1 },
+        3: () => {
+          const r = ph1.getBoundingClientRect();
+          const scale = parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize);
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2, scale, opacity: 1 };
+        },
+        4: () => {
+          const r = ph2.getBoundingClientRect();
+          const scale = parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize);
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2, scale, opacity: 1 };
+        }
       };
 
-      gsap.set(titleEn, { x: 0, y: 0, opacity: 1 });
-      gsap.set(qohelet, { left: pos.cx, top: pos.cy + 70, xPercent: -50, yPercent: -50, opacity: 0, scale: 1 });
-      verses.forEach(v => {
-        gsap.set(v.el, { opacity: 0, y: 25 });
-        v.el.classList.remove('active');
-        gsap.set(v.words, { opacity: 0, y: 10 });
-        gsap.set(v.en, { opacity: 0 });
-      });
+      // Slides 5+ (verse 3+): qohelet fades out
+      if (index >= 5) return { x: states[4]().x, y: states[4]().y, scale: states[4]().scale, opacity: 0 };
+
+      const state = states[index];
+      return typeof state === 'function' ? state() : state;
     }
 
-    // ===== MAIN TIMELINE =====
-    let mainTimeline;
-
-    function buildTimeline() {
-      mainTimeline = gsap.timeline({ paused: true });
-      const sectionDur = 1;
-
-      // Section 0: Title only (start state)
-      mainTimeline.set(titleEn, { x: 0, y: 0, opacity: 1 }, 0);
-      mainTimeline.set(qohelet, { left: pos.cx, top: pos.cy + 70, opacity: 0, scale: 1 }, 0);
-      mainTimeline.addLabel('title', 0);
-
-      // Section 1: Title + Qohelet
-      mainTimeline.to(titleEn, { y: -50, duration: sectionDur, ease: 'power2.inOut' }, 0);
-      mainTimeline.to(qohelet, { left: pos.cx, top: pos.cy + 40, opacity: 1, duration: sectionDur, ease: 'power2.inOut' }, 0);
-      mainTimeline.addLabel('titleAndQohelet', sectionDur);
-
-      // Section 2: Qohelet Alone
-      mainTimeline.to(titleEn, { y: -75, opacity: 0, duration: sectionDur, ease: 'power2.inOut' }, sectionDur);
-      mainTimeline.to(qohelet, { top: pos.cy, duration: sectionDur, ease: 'power2.inOut' }, sectionDur);
-      mainTimeline.addLabel('qoheletAlone', sectionDur * 2);
-
-      // Verse sections
-      verses.forEach((verse, i) => {
-        const startTime = (INTRO_SECTIONS + i - 1) * sectionDur;
-
-        mainTimeline.call(() => verse.el.classList.add('active'), [], startTime);
-        mainTimeline.fromTo(verse.el,
-          { opacity: 0, y: 25 },
-          { opacity: 1, y: 0, duration: sectionDur, ease: 'power2.out' },
-          startTime
-        );
-
-        mainTimeline.to(verse.words, {
-          opacity: 1,
-          y: 0,
-          stagger: 0.06,
-          duration: 0.4,
-          ease: 'back.out(1.4)'
-        }, startTime + 0.2);
-
-        mainTimeline.to(verse.en, {
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out'
-        }, startTime + 0.5);
-
-        // Qohelet positioning
-        if (i === 0) {
-          mainTimeline.to(qohelet, {
-            left: pos.slot1.x,
-            top: pos.slot1.y,
-            scale: pos.scale,
-            duration: sectionDur,
-            ease: 'power2.inOut'
-          }, startTime);
-        } else if (i === 1) {
-          mainTimeline.to(qohelet, {
-            left: pos.slot2.x,
-            top: pos.slot2.y,
-            duration: sectionDur,
-            ease: 'power2.inOut'
-          }, startTime);
-        } else if (i === 2) {
-          mainTimeline.to(qohelet, {
-            opacity: 0,
-            duration: sectionDur * 0.6,
-            ease: 'power2.out'
-          }, startTime);
-        }
-
-        // Previous verse fades out
-        if (i > 0) {
-          const prevVerse = verses[i - 1];
-          mainTimeline.to(prevVerse.el, {
-            opacity: 0,
-            y: -15,
-            duration: sectionDur * 0.5,
-            ease: 'power2.in',
-            onComplete: () => prevVerse.el.classList.remove('active')
-          }, startTime);
-        }
-
-        mainTimeline.addLabel(`verse${i + 1}`, startTime + sectionDur);
-      });
-
-      mainTimeline.totalDuration(TOTAL_SECTIONS - 1);
-    }
-
-    // ===== NAVIGATION STATE =====
-    let currentSection = 0;
-    let isAnimating = false;
-
-    function goToSection(index, immediate = false) {
-      index = Math.max(0, Math.min(TOTAL_SECTIONS - 1, index));
-      if (index === currentSection && !immediate) return;
-
-      currentSection = index;
-      isAnimating = true;
-
-      const targetProgress = index / (TOTAL_SECTIONS - 1);
-
-      gsap.to(mainTimeline, {
-        progress: targetProgress,
-        duration: immediate ? 0 : 0.6,
+    function animateQohelet(index) {
+      const state = getQoheletState(index);
+      gsap.to(qohelet, {
+        left: state.x,
+        top: state.y,
+        scale: state.scale,
+        opacity: state.opacity,
+        duration: 0.6,
         ease: 'power2.inOut',
-        onUpdate: updateUI,
-        onComplete: () => { isAnimating = false; }
+        xPercent: -50,
+        yPercent: -50
       });
-
-      updateHints();
     }
 
-    function updateUI() {
-      const p = mainTimeline.progress();
-      progress.style.width = (p * 100) + '%';
-
-      const inVerses = currentSection >= INTRO_SECTIONS;
-      verseNum.style.opacity = inVerses ? 1 : 0;
-
-      updateSelectorHighlight();
-    }
-
-    // ===== OBSERVER =====
-    function setupObserver() {
-      Observer.create({
-        type: 'wheel,touch,pointer',
-        wheelSpeed: -1,
-        tolerance: 10,
-        preventDefault: true,
-        onUp: () => {
-          if (!isAnimating && currentSection > 0) {
-            hideTooltip();
-            goToSection(currentSection - 1);
-          }
+    // ===== SWIPER =====
+    const swiper = new Swiper('.swiper', {
+      direction: 'vertical',
+      speed: 600,
+      keyboard: { enabled: true },
+      mousewheel: { sensitivity: 1 },
+      pagination: {
+        el: '.swiper-pagination',
+        type: 'progressbar'
+      },
+      on: {
+        slideChange: (s) => {
+          animateQohelet(s.activeIndex);
+          updateNav(s.activeIndex);
+          if (s.activeIndex > 0) gsap.to(scrollHint, { opacity: 0, duration: 0.5 });
         },
-        onDown: () => {
-          if (!isAnimating && currentSection < TOTAL_SECTIONS - 1) {
-            hideTooltip();
-            goToSection(currentSection + 1);
-          }
-        }
-      });
-    }
-
-    // ===== KEYBOARD =====
-    function setupKeyboard() {
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          if (tooltipVisible) hideTooltip();
-          if (selectorOpen) closeSelector();
-          return;
-        }
-
-        if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
-          e.preventDefault();
-          if (!isAnimating) goToSection(currentSection + 1);
-        } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
-          e.preventDefault();
-          if (!isAnimating) goToSection(currentSection - 1);
-        }
-      });
-    }
-
-    // ===== VERSE SELECTOR =====
-    let selectorOpen = false;
-
-    function buildVerseSelector() {
-      verseNum.innerHTML = '';
-      verses.forEach((verse, i) => {
-        const option = document.createElement('span');
-        option.className = 'verse-num-option';
-        option.textContent = verse.ref;
-        option.dataset.index = i;
-        option.addEventListener('click', e => {
-          e.stopPropagation();
-          if (selectorOpen) {
-            goToSection(INTRO_SECTIONS + i);
-            closeSelector();
-          } else {
-            openSelector();
-          }
-        });
-        verseNum.appendChild(option);
-      });
-    }
-
-    function openSelector() {
-      if (selectorOpen) return;
-      selectorOpen = true;
-      verseNum.classList.add('open');
-    }
-
-    function closeSelector() {
-      if (!selectorOpen) return;
-      selectorOpen = false;
-      verseNum.classList.remove('open');
-    }
-
-    function updateSelectorHighlight() {
-      const verseIndex = Math.max(0, currentSection - INTRO_SECTIONS);
-      const options = verseNum.querySelectorAll('.verse-num-option');
-      options.forEach((opt, i) => {
-        opt.classList.toggle('current', i === verseIndex && currentSection >= INTRO_SECTIONS);
-      });
-    }
-
-    // ===== HINTS =====
-    let scrollHintHidden = false;
-    let tapHintVisible = false;
-    let tapHintHidden = false;
-
-    function updateHints() {
-      if (currentSection > 0 && !scrollHintHidden) {
-        scrollHintHidden = true;
-        gsap.to(scrollHint, { opacity: 0, duration: 0.5, onComplete: () => scrollHint.style.display = 'none' });
+        init: (s) => animateQohelet(0)
       }
+    });
 
-      if (currentSection === 2 && !tapHintHidden) {
-        if (!tapHintVisible) {
-          tapHintVisible = true;
-          gsap.to(tapHint, { opacity: 1, duration: 0.5 });
-        }
-      } else if (tapHintVisible && !tapHintHidden) {
-        tapHintHidden = true;
-        gsap.to(tapHint, { opacity: 0, duration: 0.5, onComplete: () => tapHint.style.display = 'none' });
-      }
-    }
-
-    // ===== TOOLTIP (GSAP + Floating UI) =====
-    let tooltipVisible = false;
-    let activeWord = null;
-
-    async function showTooltip(wordEl, linkValue) {
-      const data = wordData[linkValue];
-      if (!data) return;
-
-      activeWord = wordEl;
-      tooltipHebrew.textContent = data.hebrew;
-      tooltipTransliteration.textContent = data.transliteration;
-      tooltipTidbit.textContent = data.tidbit;
-
-      // Position with Floating UI
-      const isHebrew = wordEl.classList.contains('word-he') || wordEl.classList.contains('title-he');
-      const { x, y } = await computePosition(wordEl, wordTooltip, {
-        placement: isHebrew ? 'top' : 'bottom',
-        middleware: [
-          offset(14),
-          flip({ padding: 20 }),
-          shift({ padding: 12 })
-        ]
+    // ===== VERSE NAV =====
+    function updateNav(index) {
+      verseNav.classList.toggle('visible', index >= 3);
+      verseNav.querySelectorAll('span').forEach((el, i) => {
+        el.classList.toggle('active', i + 3 === index);
       });
-
-      wordTooltip.style.left = `${x}px`;
-      wordTooltip.style.top = `${y}px`;
-      wordTooltip.classList.add('visible');
-
-      // GSAP spring-in animation
-      gsap.fromTo(wordTooltip,
-        { opacity: 0, y: isHebrew ? 12 : -12, scale: 0.92 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.7)' }
-      );
-
-      // Staggered content animation
-      gsap.fromTo([tooltipHebrew, tooltipTransliteration, tooltipTidbit],
-        { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, duration: 0.35, stagger: 0.07, ease: 'back.out(1.4)', delay: 0.05 }
-      );
-
-      tooltipVisible = true;
-
-      // Hide tap hint
-      if (tapHintVisible && !tapHintHidden) {
-        tapHintHidden = true;
-        gsap.to(tapHint, { opacity: 0, duration: 0.5, onComplete: () => tapHint.style.display = 'none' });
-      }
     }
 
-    function hideTooltip() {
-      if (!tooltipVisible) return;
-
-      gsap.to(wordTooltip, {
-        opacity: 0,
-        y: 8,
-        scale: 0.95,
-        duration: 0.25,
-        ease: 'power2.in',
-        onComplete: () => {
-          wordTooltip.classList.remove('visible');
-        }
-      });
-
-      tooltipVisible = false;
-      activeWord = null;
-      clearLit();
-    }
-
-    function toggleTooltip(wordEl, linkValue) {
-      if (tooltipVisible && activeWord === wordEl) {
-        hideTooltip();
-      } else {
-        showTooltip(wordEl, linkValue);
-      }
-    }
+    verseNav.addEventListener('click', e => {
+      const slide = e.target.dataset.slide;
+      if (slide) swiper.slideTo(parseInt(slide));
+    });
 
     // ===== HIGHLIGHTING =====
     let litElements = [];
-    let staggerTimers = [];
-
+    function lightUp(link) {
+      litElements.forEach(el => el.classList.remove('lit'));
+      litElements = [...document.querySelectorAll(`[data-link="${link}"]`)];
+      litElements.forEach(el => el.classList.add('lit'));
+    }
     function clearLit() {
-      staggerTimers.forEach(t => clearTimeout(t));
-      staggerTimers = [];
-      litElements.forEach(el => {
-        el.classList.remove('lit', 'lit-stagger');
-        el.style.animationDelay = '';
-      });
+      litElements.forEach(el => el.classList.remove('lit'));
       litElements = [];
     }
 
-    function lightUp(linkValue, stagger = false) {
-      if (!linkValue) return;
-      clearLit();
-
-      const elements = [...document.querySelectorAll(`[data-link="${linkValue}"]`)];
-      litElements = elements;
-
-      if (stagger && elements.length > 1) {
-        elements.forEach((el, i) => {
-          const timer = setTimeout(() => {
-            el.style.animationDelay = '0s';
-            el.classList.add('lit-stagger');
-          }, i * 60);
-          staggerTimers.push(timer);
-        });
-      } else {
-        elements.forEach(el => el.classList.add('lit'));
+    // ===== TIPPY TOOLTIPS =====
+    async function initTooltips() {
+      try {
+        wordData = await fetch('./words.json').then(r => r.json());
+      } catch (e) {
+        console.warn('Could not load words.json');
+        return;
       }
-    }
 
-    // ===== TOUCH FEEDBACK =====
-    let touchFeedbackEl = null;
-
-    function addTouchFeedback(el) {
-      if (touchFeedbackEl) touchFeedbackEl.classList.remove('touch-active');
-      touchFeedbackEl = el;
-      el.classList.add('touch-active');
-    }
-
-    function removeTouchFeedback() {
-      if (touchFeedbackEl) {
-        touchFeedbackEl.classList.remove('touch-active');
-        touchFeedbackEl = null;
-      }
-    }
-
-    // ===== INTERACTIONS (Event Delegation) =====
-    let pendingTap = null;
-
-    function setupInteractions() {
-      // Single delegated listener for all word interactions
-      scene.addEventListener('click', e => {
-        const word = e.target.closest('[data-link]');
-        if (word) {
-          lightUp(word.dataset.link, true);
-          toggleTooltip(word, word.dataset.link);
-        }
-      });
-
-      scene.addEventListener('mousemove', e => {
-        if (tooltipVisible) return;
-        const word = e.target.closest('[data-link]');
-        if (word) {
-          lightUp(word.dataset.link, false);
-        }
-      });
-
-      scene.addEventListener('mouseleave', () => {
-        if (!tooltipVisible) clearLit();
-      });
-
-      // Touch handling for scene words
-      scene.addEventListener('touchstart', e => {
-        const word = e.target.closest('[data-link]');
-        if (word) {
-          pendingTap = { el: word, link: word.dataset.link };
-          addTouchFeedback(word);
-        }
-      }, { passive: true });
-
-      // Qohelet interactions
-      qohelet.addEventListener('mouseenter', () => {
-        if (!tooltipVisible) lightUp('teacher', false);
-      });
-      qohelet.addEventListener('mouseleave', () => {
-        if (!tooltipVisible) clearLit();
-      });
-      qohelet.addEventListener('click', () => {
-        lightUp('teacher', true);
-        toggleTooltip(qohelet, 'teacher');
-      });
-      qohelet.addEventListener('touchstart', () => {
-        pendingTap = { el: qohelet, link: 'teacher' };
-        addTouchFeedback(qohelet);
-      }, { passive: true });
-
-      // Global touch end
-      document.addEventListener('touchend', () => {
-        if (pendingTap) {
-          lightUp(pendingTap.link, true);
-          toggleTooltip(pendingTap.el, pendingTap.link);
-        }
-        pendingTap = null;
-        removeTouchFeedback();
-      });
-
-      // Dismiss on outside click/touch
-      document.addEventListener('click', e => {
-        if (tooltipVisible && !wordTooltip.contains(e.target) && !e.target.closest('[data-link]')) {
-          hideTooltip();
-        }
-        if (selectorOpen && !e.target.closest('.verse-num')) {
-          closeSelector();
-        }
+      tippy('[data-link]', {
+        content: (el) => {
+          const data = wordData[el.dataset.link];
+          if (!data) return '';
+          return `
+            <div class="tooltip-hebrew">${data.hebrew}</div>
+            <div class="tooltip-translit">${data.transliteration}</div>
+            <div class="tooltip-tidbit">${data.tidbit}</div>
+          `;
+        },
+        allowHTML: true,
+        placement: (ref) => ref.classList.contains('word-en') ? 'bottom' : 'top',
+        animation: 'scale',
+        theme: 'ecclesiastes',
+        interactive: true,
+        appendTo: document.body,
+        onShow: (instance) => lightUp(instance.reference.dataset.link),
+        onHide: () => clearLit(),
+        touch: ['hold', 300]
       });
     }
 
     // ===== INIT =====
-    async function init() {
-      // Load word data
-      try {
-        wordData = await fetch('./words.json').then(r => r.json());
-      } catch (e) {
-        console.warn('Could not load words.json, using inline fallback');
-        wordData = {};
-      }
-
-      measure();
-      buildTimeline();
-      buildVerseSelector();
-      setupObserver();
-      setupKeyboard();
-      setupInteractions();
-
-      goToSection(0, true);
-    }
-
-    document.fonts.ready.then(init);
-    window.addEventListener('resize', () => {
-      measure();
-      buildTimeline();
-      goToSection(currentSection, true);
-    });
+    document.fonts.ready.then(initTooltips);
+    window.addEventListener('resize', () => animateQohelet(swiper.activeIndex));
   </script>
 </body>
 </html>
