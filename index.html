@@ -6,7 +6,6 @@
   <title>Ecclesiastes 1:1-4</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css">
   <style>
     :root {
       --gold: #daa520;
@@ -30,7 +29,7 @@
       font-family: 'Cormorant Garamond', serif;
     }
 
-    /* Swiper container */
+    /* ===== SWIPER ===== */
     .swiper {
       width: 100%;
       height: 100%;
@@ -42,11 +41,10 @@
       justify-content: center;
     }
 
-    /* Progress bar (Swiper handles updates) */
     .swiper-pagination-progressbar {
       background: transparent !important;
-      bottom: env(safe-area-inset-bottom, 0) !important;
       top: auto !important;
+      bottom: env(safe-area-inset-bottom, 0) !important;
       height: clamp(3px, 0.4vw, 5px) !important;
     }
 
@@ -57,6 +55,7 @@
 
     /* ===== TITLES ===== */
     .title-en {
+      position: absolute;
       font-size: var(--font-title-en);
       font-weight: 300;
       color: var(--cream);
@@ -66,6 +65,9 @@
 
     .title-he {
       position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       font-size: var(--font-title-he);
       font-weight: 400;
       color: var(--gold);
@@ -75,10 +77,12 @@
       cursor: pointer;
       -webkit-user-select: none;
       user-select: none;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
       opacity: 0;
+      pointer-events: none;
+    }
+
+    .title-he.visible {
+      pointer-events: auto;
     }
 
     /* ===== VERSES ===== */
@@ -109,6 +113,7 @@
       text-align: center;
       color: var(--cream-dim);
       letter-spacing: 0.03em;
+      opacity: 0;
     }
 
     /* ===== WORDS ===== */
@@ -118,16 +123,17 @@
       color: var(--gold);
       padding: var(--word-padding);
       cursor: pointer;
-      transition: color 0.25s ease, text-shadow 0.25s ease;
+      transition: color 0.25s, text-shadow 0.25s;
       -webkit-user-select: none;
       user-select: none;
+      opacity: 0;
     }
 
     .word-en {
       color: var(--cream-dim);
       padding: 0.1em 0.15em;
       cursor: pointer;
-      transition: color 0.25s ease, text-shadow 0.25s ease;
+      transition: color 0.25s, text-shadow 0.25s;
       -webkit-user-select: none;
       user-select: none;
     }
@@ -139,26 +145,24 @@
       padding: var(--word-padding);
     }
 
-    /* ===== HIGHLIGHTING ===== */
-    [data-tippy-content].lit {
-      --glow: 0 0 20px rgba(218, 165, 32, 0.6);
-      color: var(--gold-lit);
-      text-shadow: var(--glow);
+    /* ===== LIT STATES ===== */
+    [data-link].lit {
       animation: glowPulse 2.5s ease-in-out infinite;
     }
 
-    .word-en.lit {
-      --glow: 0 0 15px rgba(255, 255, 255, 0.5);
-      color: #fff;
+    .word-he.lit, .title-he.lit {
+      color: var(--gold-lit);
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.6);
     }
 
-    .title-he.lit {
-      --glow: 0 0 25px rgba(218, 165, 32, 0.6);
+    .word-en.lit {
+      color: #fff;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
     }
 
     @keyframes glowPulse {
-      0%, 100% { text-shadow: var(--glow); filter: brightness(1); }
-      50% { text-shadow: var(--glow), var(--glow); filter: brightness(1.1); }
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.1); }
     }
 
     /* ===== TIPPY THEME ===== */
@@ -169,11 +173,15 @@
       border: 1px solid rgba(218, 165, 32, 0.25);
       border-radius: clamp(12px, 1.5vw, 16px);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 80px rgba(218, 165, 32, 0.08);
-      max-width: min(400px, 85vw) !important;
+    }
+
+    .tippy-box[data-theme~='ecclesiastes'] .tippy-content {
       padding: clamp(16px, 2vw, 24px) clamp(20px, 2.5vw, 32px);
     }
 
-    .tippy-box[data-theme~='ecclesiastes'] .tippy-arrow { display: none; }
+    .tippy-box[data-theme~='ecclesiastes'] .tippy-arrow {
+      color: rgba(10, 8, 6, 0.85);
+    }
 
     .tooltip-hebrew {
       font-size: clamp(22px, 4vw, 34px);
@@ -200,73 +208,40 @@
       font-size: clamp(13px, 2vw, 18px);
       color: rgba(232, 228, 220, 0.85);
       line-height: 1.6;
-      font-weight: 300;
+      max-width: 340px;
     }
-
-    /* ===== VERSE SELECTOR ===== */
-    .verse-nav {
-      position: fixed;
-      top: clamp(20px, 3vw, 40px);
-      right: clamp(20px, 3vw, 40px);
-      display: flex;
-      gap: 8px;
-      font-size: clamp(14px, 2vw, 22px);
-      color: rgba(245, 242, 235, 0.5);
-      z-index: 50;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .verse-nav.visible { opacity: 1; }
-
-    .verse-nav span {
-      cursor: pointer;
-      padding: 8px 10px;
-      border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .verse-nav span:hover {
-      background: rgba(218, 165, 32, 0.15);
-      color: var(--cream);
-    }
-
-    .verse-nav span.active { color: var(--gold); }
 
     /* ===== HINTS ===== */
-    .scroll-hint {
+    .hint {
       position: fixed;
       bottom: calc(28px + env(safe-area-inset-bottom, 0px));
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      animation: fadeIn 1.5s ease 2s forwards;
-      pointer-events: none;
-      z-index: 50;
-    }
-
-    .scroll-hint-text {
       font-size: clamp(12px, 1.5vw, 16px);
-      color: rgba(245, 242, 235, 0.5);
       letter-spacing: 0.15em;
       text-transform: uppercase;
       font-weight: 300;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.5s;
     }
 
-    .scroll-hint-chevron {
+    .scroll-hint { color: rgba(245, 242, 235, 0.5); }
+    .tap-hint { color: rgba(218, 165, 32, 0.6); }
+
+    .hint.visible { opacity: 1; }
+
+    .chevron {
       width: clamp(20px, 2.5vw, 28px);
       height: clamp(20px, 2.5vw, 28px);
+      margin: 6px auto 0;
       border-right: 2px solid rgba(218, 165, 32, 0.5);
       border-bottom: 2px solid rgba(218, 165, 32, 0.5);
       transform: rotate(45deg);
       animation: bounce 1.5s ease-in-out infinite;
     }
 
-    @keyframes fadeIn { to { opacity: 1; } }
     @keyframes bounce {
       0%, 100% { transform: rotate(45deg) translateY(0); }
       50% { transform: rotate(45deg) translateY(4px); }
@@ -274,23 +249,24 @@
   </style>
 </head>
 <body>
+
+  <!-- Floating Qohelet -->
+  <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
+
+  <!-- Swiper -->
   <div class="swiper">
     <div class="swiper-wrapper">
-      <!-- Slide 0: Title only -->
       <div class="swiper-slide">
         <div class="title-en">Ecclesiastes</div>
       </div>
 
-      <!-- Slide 1: Title + Qohelet (handled by choreography) -->
       <div class="swiper-slide">
         <div class="title-en" style="transform: translateY(-50px)">Ecclesiastes</div>
       </div>
 
-      <!-- Slide 2: Qohelet alone (choreography centers it) -->
       <div class="swiper-slide"></div>
 
-      <!-- Slide 3: Verse 1 -->
-      <div class="swiper-slide" data-verse="1">
+      <div class="swiper-slide">
         <div class="verse">
           <div class="verse-he">
             <span class="word-he" data-link="words">דִּבְרֵי</span>
@@ -303,8 +279,7 @@
         </div>
       </div>
 
-      <!-- Slide 4: Verse 2 -->
-      <div class="swiper-slide" data-verse="2">
+      <div class="swiper-slide">
         <div class="verse">
           <div class="verse-he">
             <span class="word-he" data-link="vanity">הֲבֵל</span>
@@ -320,8 +295,7 @@
         </div>
       </div>
 
-      <!-- Slide 5: Verse 3 -->
-      <div class="swiper-slide" data-verse="3">
+      <div class="swiper-slide">
         <div class="verse">
           <div class="verse-he">
             <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
@@ -335,8 +309,7 @@
         </div>
       </div>
 
-      <!-- Slide 6: Verse 4 -->
-      <div class="swiper-slide" data-verse="4">
+      <div class="swiper-slide">
         <div class="verse">
           <div class="verse-he">
             <span class="word-he" data-link="generation">דּוֹר</span>
@@ -354,19 +327,12 @@
     <div class="swiper-pagination"></div>
   </div>
 
-  <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
-
-  <nav class="verse-nav" id="verseNav">
-    <span data-slide="3">1:1</span>
-    <span data-slide="4">1:2</span>
-    <span data-slide="5">1:3</span>
-    <span data-slide="6">1:4</span>
-  </nav>
-
-  <div class="scroll-hint" id="scrollHint">
-    <span class="scroll-hint-text">Swipe to explore</span>
-    <div class="scroll-hint-chevron"></div>
+  <!-- Hints -->
+  <div class="hint scroll-hint" id="scrollHint">
+    Swipe to explore
+    <div class="chevron"></div>
   </div>
+  <div class="hint tap-hint" id="tapHint">Tap the word to explore</div>
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
@@ -374,90 +340,100 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <script>
-    // ===== WORD DATA =====
-    let wordData = {};
+    const wordData = {
+      'words': { hebrew: 'דִּבְרֵי', translit: 'div·rei', tidbit: 'The construct form of "devarim" (words/things). In Hebrew, words and things share the same root — speech has substance, creating reality.' },
+      'teacher': { hebrew: 'קֹהֶלֶת', translit: 'qo·he·let', tidbit: 'From "qahal" (assembly). One who gathers people to teach. Traditionally identified as Solomon in his old age, reflecting on life\'s meaning.' },
+      'son': { hebrew: 'בֶּן־דָּוִד', translit: 'ben-da·vid', tidbit: 'Son of David — a title claiming royal Davidic lineage. The hyphen (maqef) binds the words as one concept: a unified identity.' },
+      'king': { hebrew: 'מֶלֶךְ', translit: 'me·lekh', tidbit: 'King — from a root meaning "to counsel." The king wasn\'t merely a ruler but an advisor to the nation, responsible for wisdom and justice.' },
+      'jerusalem': { hebrew: 'בִּירוּשָׁלָֽםִ', translit: 'bi·ru·sha·la·yim', tidbit: 'In Jerusalem — literally "foundation of peace" (or "teaching of peace"). The city where heaven and earth meet, seat of wisdom and worship.' },
+      'vanity': { hebrew: 'הֶבֶל', translit: 'he·vel', tidbit: 'Often translated "vanity" but literally means breath, vapor, or mist. Something that appears and quickly vanishes — not worthless, but fleeting and ungraspable.' },
+      'says': { hebrew: 'אָמַר', translit: 'a·mar', tidbit: 'He said — the basic Hebrew word for speech. Its placement here gives Qohelet\'s words prophetic weight, like "thus says the LORD."' },
+      'all': { hebrew: 'הַכֹּל', translit: 'ha·kol', tidbit: 'The all, everything — with the definite article. Not just "everything" but THE everything: the totality of human experience under the sun.' },
+      'gain': { hebrew: 'מַה־יִּתְרוֹן', translit: 'mah-yit·ron', tidbit: 'What profit/advantage? "Yitron" appears only in Ecclesiastes — a commercial term asking what remains after all costs are counted.' },
+      'man': { hebrew: 'לָאָדָם', translit: 'la·a·dam', tidbit: 'To/for the human — "adam" connects to "adamah" (earth/ground). Humanity is earthbound, made from dust and returning to it.' },
+      'labor': { hebrew: 'בְּכָל־עֲמָלוֹ', translit: 'be·khol-a·ma·lo', tidbit: 'In all his toil — "amal" implies wearisome, exhausting labor. Not just work, but the grinding effort that wears down body and soul.' },
+      'toils': { hebrew: 'שֶׁיַּעֲמֹל', translit: 'she·ya·a·mol', tidbit: 'That he toils — the same root as "amal" intensified. The repetition emphasizes life\'s endless cycle of effort upon effort.' },
+      'under': { hebrew: 'תַּחַת', translit: 'ta·chat', tidbit: 'Under/beneath — establishes a boundary. Everything "under the sun" is earthly, temporal. What lies above remains a mystery.' },
+      'sun': { hebrew: 'הַשָּׁמֶשׁ', translit: 'ha·sha·mesh', tidbit: 'The sun — "under the sun" appears 29 times in Ecclesiastes. It defines the book\'s scope: life as experienced in this visible world, under heaven\'s watchful eye.' },
+      'generation': { hebrew: 'דּוֹר', translit: 'dor', tidbit: 'Generation — from a root meaning "to circle" or "to dwell." Each generation inhabits its moment, then yields to the next in an endless cycle.' },
+      'goes': { hebrew: 'הֹלֵךְ', translit: 'ho·lekh', tidbit: 'Goes/walks away — the present participle of "halakh" (to walk). Life is movement toward departure; every generation is always already leaving.' },
+      'comes': { hebrew: 'בָּא', translit: 'ba', tidbit: 'Comes/arrives — the counterpart to "goes." While one generation departs, another enters. The stage is never empty, yet the actors always change.' },
+      'earth': { hebrew: 'וְהָאָרֶץ', translit: 've·ha·a·retz', tidbit: 'But the earth — "eretz" is the land, the ground, the world itself. Against human transience, it stands as silent witness to all comings and goings.' },
+      'forever': { hebrew: 'לְעוֹלָם', translit: 'le·o·lam', tidbit: 'Forever — "olam" means hidden time, eternity, or age. The earth endures into time beyond human reckoning, a permanence we can name but never know.' },
+      'remains': { hebrew: 'עֹמָדֶת', translit: 'o·me·det', tidbit: 'Stands/remains — from "amad" (to stand firm). While generations flow like water, the earth stands like a rock. The verb suggests quiet, steadfast presence.' }
+    };
 
-    // ===== ELEMENTS =====
     const qohelet = document.getElementById('qohelet');
-    const verseNav = document.getElementById('verseNav');
-    const scrollHint = document.getElementById('scrollHint');
     const ph1 = document.getElementById('ph1');
     const ph2 = document.getElementById('ph2');
+    const scrollHint = document.getElementById('scrollHint');
+    const tapHint = document.getElementById('tapHint');
 
-    // ===== QOHELET CHOREOGRAPHY (the novel part) =====
-    function getQoheletState(index) {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-
-      const states = {
-        0: { x: cx, y: cy + 70, scale: 1, opacity: 0 },
-        1: { x: cx, y: cy + 40, scale: 1, opacity: 1 },
-        2: { x: cx, y: cy, scale: 1, opacity: 1 },
-        3: () => {
-          const r = ph1.getBoundingClientRect();
-          const scale = parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize);
-          return { x: r.left + r.width / 2, y: r.top + r.height / 2, scale, opacity: 1 };
-        },
-        4: () => {
-          const r = ph2.getBoundingClientRect();
-          const scale = parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize);
-          return { x: r.left + r.width / 2, y: r.top + r.height / 2, scale, opacity: 1 };
-        }
-      };
-
-      // Slides 5+ (verse 3+): qohelet fades out
-      if (index >= 5) return { x: states[4]().x, y: states[4]().y, scale: states[4]().scale, opacity: 0 };
-
-      const state = states[index];
-      return typeof state === 'function' ? state() : state;
+    // ===== QOHELET CHOREOGRAPHY =====
+    // Measure placeholder positions dynamically (they're always in DOM, just translated)
+    function getSlotPosition(placeholder) {
+      const r = placeholder.getBoundingClientRect();
+      const scale = parseFloat(getComputedStyle(placeholder).fontSize) /
+                    parseFloat(getComputedStyle(qohelet).fontSize);
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, scale };
     }
 
     function animateQohelet(index) {
-      const state = getQoheletState(index);
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      let state;
+      switch (index) {
+        case 0: state = { x: cx, y: cy + 70, scale: 1, opacity: 0 }; break;
+        case 1: state = { x: cx, y: cy + 40, scale: 1, opacity: 1 }; break;
+        case 2: state = { x: cx, y: cy, scale: 1, opacity: 1 }; break;
+        case 3:
+          const s1 = getSlotPosition(ph1);
+          state = { x: s1.x, y: s1.y, scale: s1.scale, opacity: 1 };
+          break;
+        case 4:
+          const s2 = getSlotPosition(ph2);
+          state = { x: s2.x, y: s2.y, scale: s2.scale, opacity: 1 };
+          break;
+        default: // 5+: fade out at last position
+          const s2b = getSlotPosition(ph2);
+          state = { x: s2b.x, y: s2b.y, scale: s2b.scale, opacity: 0 };
+          break;
+      }
+
+      qohelet.classList.toggle('visible', state.opacity > 0);
+
       gsap.to(qohelet, {
         left: state.x,
         top: state.y,
         scale: state.scale,
         opacity: state.opacity,
         duration: 0.6,
-        ease: 'power2.inOut',
-        xPercent: -50,
-        yPercent: -50
+        ease: 'power2.inOut'
       });
     }
 
-    // ===== SWIPER =====
-    const swiper = new Swiper('.swiper', {
-      direction: 'vertical',
-      speed: 600,
-      keyboard: { enabled: true },
-      mousewheel: { sensitivity: 1 },
-      pagination: {
-        el: '.swiper-pagination',
-        type: 'progressbar'
-      },
-      on: {
-        slideChange: (s) => {
-          animateQohelet(s.activeIndex);
-          updateNav(s.activeIndex);
-          if (s.activeIndex > 0) gsap.to(scrollHint, { opacity: 0, duration: 0.5 });
-        },
-        init: (s) => animateQohelet(0)
-      }
-    });
+    // ===== VERSE ANIMATIONS =====
+    function animateVerseIn(slide) {
+      const words = slide.querySelectorAll('.word-he');
+      const en = slide.querySelector('.verse-en');
+      if (!words.length) return;
 
-    // ===== VERSE NAV =====
-    function updateNav(index) {
-      verseNav.classList.toggle('visible', index >= 3);
-      verseNav.querySelectorAll('span').forEach((el, i) => {
-        el.classList.toggle('active', i + 3 === index);
-      });
+      gsap.fromTo(words,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, stagger: 0.06, duration: 0.4, ease: 'back.out(1.4)' }
+      );
+      gsap.to(en, { opacity: 1, duration: 0.5, delay: 0.3 });
     }
 
-    verseNav.addEventListener('click', e => {
-      const slide = e.target.dataset.slide;
-      if (slide) swiper.slideTo(parseInt(slide));
-    });
+    function resetVerse(slide) {
+      const words = slide.querySelectorAll('.word-he');
+      const en = slide.querySelector('.verse-en');
+      if (!words.length) return;
+
+      gsap.set(words, { opacity: 0, y: 10 });
+      gsap.set(en, { opacity: 0 });
+    }
 
     // ===== HIGHLIGHTING =====
     let litElements = [];
@@ -471,40 +447,79 @@
       litElements = [];
     }
 
-    // ===== TIPPY TOOLTIPS =====
-    async function initTooltips() {
-      try {
-        wordData = await fetch('./words.json').then(r => r.json());
-      } catch (e) {
-        console.warn('Could not load words.json');
-        return;
+    // ===== HINTS =====
+    let scrollHintShown = false, tapHintDismissed = false;
+
+    function updateHints(index) {
+      if (index === 0 && !scrollHintShown) {
+        setTimeout(() => scrollHint.classList.add('visible'), 2000);
+        scrollHintShown = true;
+      } else {
+        scrollHint.classList.remove('visible');
       }
 
-      tippy('[data-link]', {
-        content: (el) => {
-          const data = wordData[el.dataset.link];
-          if (!data) return '';
-          return `
-            <div class="tooltip-hebrew">${data.hebrew}</div>
-            <div class="tooltip-translit">${data.transliteration}</div>
-            <div class="tooltip-tidbit">${data.tidbit}</div>
-          `;
-        },
-        allowHTML: true,
-        placement: (ref) => ref.classList.contains('word-en') ? 'bottom' : 'top',
-        animation: 'scale',
-        theme: 'ecclesiastes',
-        interactive: true,
-        appendTo: document.body,
-        onShow: (instance) => lightUp(instance.reference.dataset.link),
-        onHide: () => clearLit(),
-        touch: ['hold', 300]
-      });
+      if (index === 2 && !tapHintDismissed) {
+        tapHint.classList.add('visible');
+      } else {
+        tapHint.classList.remove('visible');
+      }
     }
 
     // ===== INIT =====
-    document.fonts.ready.then(initTooltips);
-    window.addEventListener('resize', () => animateQohelet(swiper.activeIndex));
+    document.fonts.ready.then(() => {
+      // Force layout before measuring
+      document.body.offsetHeight;
+
+      const swiper = new Swiper('.swiper', {
+        direction: 'vertical',
+        speed: 600,
+        keyboard: { enabled: true },
+        mousewheel: { sensitivity: 1 },
+        pagination: { el: '.swiper-pagination', type: 'progressbar' },
+        on: {
+          slideChange: function () {
+            animateQohelet(this.activeIndex);
+            updateHints(this.activeIndex);
+
+            const slide = this.slides[this.activeIndex];
+            if (slide.querySelector('.verse')) {
+              animateVerseIn(slide);
+            }
+          },
+          slideChangeTransitionEnd: function () {
+            this.slides.forEach((slide, i) => {
+              if (i !== this.activeIndex) resetVerse(slide);
+            });
+          }
+        }
+      });
+
+      tippy('[data-link]', {
+        content: el => {
+          const d = wordData[el.dataset.link];
+          return d ? `<div class="tooltip-hebrew">${d.hebrew}</div>
+                      <div class="tooltip-translit">${d.translit}</div>
+                      <div class="tooltip-tidbit">${d.tidbit}</div>` : '';
+        },
+        allowHTML: true,
+        theme: 'ecclesiastes',
+        placement: 'top',
+        animation: 'scale',
+        interactive: true,
+        appendTo: document.body,
+        onShow: inst => {
+          lightUp(inst.reference.dataset.link);
+          tapHintDismissed = true;
+          tapHint.classList.remove('visible');
+        },
+        onHide: clearLit
+      });
+
+      animateQohelet(0);
+      updateHints(0);
+
+      window.addEventListener('resize', () => animateQohelet(swiper.activeIndex));
+    });
   </script>
 </body>
 </html>
