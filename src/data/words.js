@@ -1,0 +1,157 @@
+// Word data: transliterations and contextual tidbits for each Hebrew word
+export const wordData = {
+  'words': {
+    hebrew: 'דִּבְרֵי',
+    transliteration: 'div·rei',
+    tidbit: 'The construct form of "devarim" (words/things). In Hebrew, words and things share the same root — speech has substance, creating reality.'
+  },
+  'teacher': {
+    hebrew: 'קֹהֶלֶת',
+    transliteration: 'qo·he·let',
+    tidbit: 'From "qahal" (assembly). One who gathers people to teach. Traditionally identified as Solomon in his old age, reflecting on life\'s meaning.'
+  },
+  'son': {
+    hebrew: 'בֶּן־דָּוִד',
+    transliteration: 'ben-da·vid',
+    tidbit: 'Son of David — a title claiming royal Davidic lineage. The hyphen (maqef) binds the words as one concept: a unified identity.'
+  },
+  'king': {
+    hebrew: 'מֶלֶךְ',
+    transliteration: 'me·lekh',
+    tidbit: 'King — from a root meaning "to counsel." The king wasn\'t merely a ruler but an advisor to the nation, responsible for wisdom and justice.'
+  },
+  'jerusalem': {
+    hebrew: 'בִּירוּשָׁלָֽםִ',
+    transliteration: 'bi·ru·sha·la·yim',
+    tidbit: 'In Jerusalem — literally "foundation of peace" (or "teaching of peace"). The city where heaven and earth meet, seat of wisdom and worship.'
+  },
+  'vanity': {
+    hebrew: 'הֶבֶל',
+    transliteration: 'he·vel',
+    tidbit: 'Often translated "vanity" but literally means breath, vapor, or mist. Something that appears and quickly vanishes — not worthless, but fleeting and ungraspable.'
+  },
+  'says': {
+    hebrew: 'אָמַר',
+    transliteration: 'a·mar',
+    tidbit: 'He said — the basic Hebrew word for speech. Its placement here gives Qohelet\'s words prophetic weight, like "thus says the LORD."'
+  },
+  'all': {
+    hebrew: 'הַכֹּל',
+    transliteration: 'ha·kol',
+    tidbit: 'The all, everything — with the definite article. Not just "everything" but THE everything: the totality of human experience under the sun.'
+  },
+  'gain': {
+    hebrew: 'מַה־יִּתְרוֹן',
+    transliteration: 'mah-yit·ron',
+    tidbit: 'What profit/advantage? "Yitron" appears only in Ecclesiastes — a commercial term asking what remains after all costs are counted.'
+  },
+  'man': {
+    hebrew: 'לָאָדָם',
+    transliteration: "la·a·dam",
+    tidbit: 'To/for the human — "adam" connects to "adamah" (earth/ground). Humanity is earthbound, made from dust and returning to it.'
+  },
+  'labor': {
+    hebrew: 'בְּכָל־עֲמָלוֹ',
+    transliteration: "be·khol-a·ma·lo",
+    tidbit: 'In all his toil — "amal" implies wearisome, exhausting labor. Not just work, but the grinding effort that wears down body and soul.'
+  },
+  'toils': {
+    hebrew: 'שֶׁיַּעֲמֹל',
+    transliteration: "she·ya·a·mol",
+    tidbit: 'That he toils — the same root as "amal" intensified. The repetition emphasizes life\'s endless cycle of effort upon effort.'
+  },
+  'under': {
+    hebrew: 'תַּחַת',
+    transliteration: 'ta·chat',
+    tidbit: 'Under/beneath — establishes a boundary. Everything "under the sun" is earthly, temporal. What lies above remains a mystery.'
+  },
+  'sun': {
+    hebrew: 'הַשָּׁמֶשׁ',
+    transliteration: 'ha·sha·mesh',
+    tidbit: 'The sun — "under the sun" appears 29 times in Ecclesiastes. It defines the book\'s scope: life as experienced in this visible world, under heaven\'s watchful eye.'
+  },
+  'generation': {
+    hebrew: 'דּוֹר',
+    transliteration: 'dor',
+    tidbit: 'Generation — from a root meaning "to circle" or "to dwell." Each generation inhabits its moment, then yields to the next in an endless cycle.'
+  },
+  'goes': {
+    hebrew: 'הֹלֵךְ',
+    transliteration: 'ho·lekh',
+    tidbit: 'Goes/walks away — the present participle of "halakh" (to walk). Life is movement toward departure; every generation is always already leaving.'
+  },
+  'comes': {
+    hebrew: 'בָּא',
+    transliteration: 'ba',
+    tidbit: 'Comes/arrives — the counterpart to "goes." While one generation departs, another enters. The stage is never empty, yet the actors always change.'
+  },
+  'earth': {
+    hebrew: 'וְהָאָרֶץ',
+    transliteration: 've·ha·a·retz',
+    tidbit: 'But the earth — "eretz" is the land, the ground, the world itself. Against human transience, it stands as silent witness to all comings and goings.'
+  },
+  'forever': {
+    hebrew: 'לְעוֹלָם',
+    transliteration: 'le·o·lam',
+    tidbit: 'Forever — "olam" means hidden time, eternity, or age. The earth endures into time beyond human reckoning, a permanence we can name but never know.'
+  },
+  'remains': {
+    hebrew: 'עֹמָדֶת',
+    transliteration: 'o·me·det',
+    tidbit: 'Stands/remains — from "amad" (to stand firm). While generations flow like water, the earth stands like a rock. The verb suggests quiet, steadfast presence.'
+  }
+}
+
+// Verse definitions with Hebrew words and English translations
+export const verses = [
+  {
+    ref: '1:1',
+    hebrew: [
+      { text: 'דִּבְרֵי', link: 'words' },
+      { text: 'קֹהֶלֶת', link: 'teacher', isPlaceholder: true },
+      { text: 'בֶּן־דָּוִד', link: 'son' },
+      { text: 'מֶלֶךְ', link: 'king' },
+      { text: 'בִּירוּשָׁלָֽםִ', link: 'jerusalem' }
+    ],
+    english: 'The <words> of the <teacher>, <son> of David, <king> in <jerusalem>'
+  },
+  {
+    ref: '1:2',
+    hebrew: [
+      { text: 'הֲבֵל', link: 'vanity' },
+      { text: 'הֲבָלִים', link: 'vanity' },
+      { text: 'אָמַר', link: 'says' },
+      { text: 'קֹהֶלֶת', link: 'teacher', isPlaceholder: true },
+      { text: 'הֲבֵל', link: 'vanity' },
+      { text: 'הֲבָלִים', link: 'vanity' },
+      { text: 'הַכֹּל', link: 'all' },
+      { text: 'הָבֶל', link: 'vanity' }
+    ],
+    english: '<vanity> of <vanity>, <says> the <teacher>, <vanity> of <vanity>! <all> is <vanity>.'
+  },
+  {
+    ref: '1:3',
+    hebrew: [
+      { text: 'מַה־יִּתְרוֹן', link: 'gain' },
+      { text: 'לָאָדָם', link: 'man' },
+      { text: 'בְּכָל־עֲמָלוֹ', link: 'labor' },
+      { text: 'שֶׁיַּעֲמֹל', link: 'toils' },
+      { text: 'תַּחַת', link: 'under' },
+      { text: 'הַשָּׁמֶשׁ', link: 'sun' }
+    ],
+    english: 'What <gain> has <man> from <labor> at which he <toils> <under> the <sun>?'
+  },
+  {
+    ref: '1:4',
+    hebrew: [
+      { text: 'דּוֹר', link: 'generation' },
+      { text: 'הֹלֵךְ', link: 'goes' },
+      { text: 'וְדוֹר', link: 'generation' },
+      { text: 'בָּא', link: 'comes' },
+      { text: 'וְהָאָרֶץ', link: 'earth' },
+      { text: 'לְעוֹלָם', link: 'forever' },
+      { text: 'עֹמָדֶת', link: 'remains' }
+    ],
+    english: 'A <generation> <goes>, and a <generation> <comes>, but the <earth> <remains> <forever>.'
+  }
+]

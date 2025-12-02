@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ecclesiastes 1:1-4</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Core palette */
+      --gold: #daa520;
+      --gold-lit: #f0d060;
+      --cream: #f5f2eb;
+      --cream-dim: rgba(245, 242, 235, 0.68);
+      --bg: #0a0a0a;
+
+      /* Typography - single source of truth, scales fluidly across all devices */
+      --font-title-en: clamp(24px, 4vw, 48px);
+      --font-title-he: clamp(50px, 10vw, 120px);
+      --font-word-he: clamp(30px, 5.5vw, 56px);
+      --font-word-en: clamp(20px, 3vw, 36px);
+
+      /* Spacing */
+      --word-padding: 0.2em 0.35em;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .scene {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== ENGLISH TITLE ===== */
+    .title-en {
+      position: absolute;
+      font-size: var(--font-title-en);
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      will-change: transform, opacity;
+    }
+
+    /* ===== HEBREW TITLE (קֹהֶלֶת) ===== */
+    .title-he {
+      position: fixed;
+      font-size: var(--font-title-he);
+      font-weight: 400;
+      color: var(--gold);
+      direction: rtl;
+      z-index: 100;
+      will-change: transform, opacity;
+      transform-origin: center center;
+      /* MUST match .word-he padding proportionally */
+      padding: var(--word-padding);
+      cursor: pointer;
+      /* Prevent text selection on mobile */
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+    
+    .title-he.lit {
+      color: var(--gold-lit);
+      --glow-1: 0 0 25px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 40px rgba(218, 165, 32, 0.85), 0 0 70px rgba(218, 165, 32, 0.35);
+      --glow-bright: 1.12;
+      text-shadow: var(--glow-1);
+      animation: glowPulse 2.5s ease-in-out infinite;
+    }
+
+    .title-he.touch-active {
+      transform: translate(-50%, -50%) scale(0.97);
+      transition: transform 0.1s ease-out;
+    }
+
+    /* ===== VERSES ===== */
+    .verse {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: min(90vw, 900px);
+      will-change: transform, opacity;
+    }
+
+    .verse-he {
+      direction: rtl;
+      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.3em 0.45em;
+      line-height: 1.6;
+    }
+
+    .verse-en {
+      font-size: var(--font-word-en);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 2.2;
+      margin-top: 1.1em;
+      text-align: center;
+      /* Resting state color - improved contrast */
+      color: var(--cream-dim);
+      will-change: opacity;
+      letter-spacing: 0.03em;
+    }
+
+    /* ===== HEBREW WORDS ===== */
+    .word-he {
+      font-size: var(--font-word-he);
+      font-weight: 400;
+      /* Resting state: full gold, full opacity */
+      color: var(--gold);
+      padding: var(--word-padding);
+      cursor: pointer;
+      transition: color 0.25s ease, text-shadow 0.25s ease;
+      will-change: transform, opacity;
+      /* Prevent text selection on mobile to avoid copy/paste menu */
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+    
+    .word-he.lit {
+      color: var(--gold-lit);
+      --glow-1: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+      --glow-bright: 1.1;
+      text-shadow: var(--glow-1);
+      animation: glowPulse 2.5s ease-in-out infinite;
+    }
+
+    .word-he.lit-stagger {
+      color: var(--gold-lit);
+      --glow-1: 0 0 20px rgba(218, 165, 32, 0.6);
+      --glow-2: 0 0 30px rgba(218, 165, 32, 0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+      --glow-bright: 1.1;
+      --reveal-peak: 0 0 35px rgba(218, 165, 32, 0.9);
+      text-shadow: var(--glow-1);
+      animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 glowPulse 2.5s ease-in-out 0.4s infinite;
+    }
+
+    .word-he.touch-active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Unified glow animation - uses CSS custom properties for per-element variation */
+    @keyframes glowPulse {
+      0%, 100% {
+        text-shadow: var(--glow-1);
+        filter: brightness(1);
+      }
+      50% {
+        text-shadow: var(--glow-2);
+        filter: brightness(var(--glow-bright));
+      }
+    }
+
+    @keyframes wordReveal {
+      0% {
+        opacity: 0.5;
+        transform: scale(0.92);
+        text-shadow: 0 0 0 transparent;
+      }
+      60% {
+        transform: scale(1.05);
+        text-shadow: var(--reveal-peak);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: var(--glow-1);
+      }
+    }
+
+    /* ===== ENGLISH WORDS ===== */
+    .word-en {
+      /* Resting state: dim cream */
+      color: var(--cream-dim);
+      padding: 0.1em 0.15em;
+      cursor: pointer;
+      transition: color 0.25s ease, text-shadow 0.25s ease;
+      /* Prevent text selection on mobile */
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+    
+    .word-en.lit {
+      color: #fff;
+      --glow-1: 0 0 15px rgba(255, 255, 255, 0.5);
+      --glow-2: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
+      --glow-bright: 1.1;
+      text-shadow: var(--glow-1);
+      animation: glowPulse 2.5s ease-in-out infinite;
+    }
+
+    .word-en.lit-stagger {
+      color: #fff;
+      --glow-1: 0 0 15px rgba(255, 255, 255, 0.5);
+      --glow-2: 0 0 22px rgba(255, 255, 255, 0.7), 0 0 45px rgba(255, 255, 255, 0.2);
+      --glow-bright: 1.1;
+      --reveal-peak: 0 0 25px rgba(255, 255, 255, 0.8);
+      text-shadow: var(--glow-1);
+      animation: wordReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 glowPulse 2.5s ease-in-out 0.4s infinite;
+    }
+
+    .word-en.touch-active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease-out;
+    }
+
+    /* ===== PLACEHOLDER ===== */
+    .placeholder {
+      /* MUST exactly match .word-he */
+      font-size: var(--font-word-he);
+      font-weight: 400;
+      color: transparent;
+      padding: var(--word-padding);
+    }
+
+    /* ===== UI ===== */
+    .progress {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom, 0);
+      left: 0;
+      height: clamp(3px, 0.4vw, 5px);
+      background: linear-gradient(90deg, rgba(218, 165, 32, 0.7), rgba(240, 208, 96, 0.85));
+      box-shadow: 0 0 12px rgba(218, 165, 32, 0.4);
+    }
+
+    .verse-num {
+      position: fixed;
+      top: clamp(20px, 3vw, 40px);
+      right: clamp(20px, 3vw, 40px);
+      display: flex;
+      align-items: center;
+      font-size: clamp(14px, 2vw, 22px);
+      color: rgba(245, 242, 235, 0.7);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .verse-num-option {
+      padding: 8px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      overflow: hidden;
+      max-width: 0;
+      opacity: 0;
+      transition: max-width 0.3s ease, opacity 0.2s ease, padding 0.3s ease, color 0.15s ease, background 0.15s ease;
+    }
+
+    .verse-num-option.current {
+      max-width: 4em;
+      opacity: 1;
+      padding: 8px 10px;
+      color: rgba(245, 242, 235, 0.7);
+    }
+
+    .verse-num-option.current:hover {
+      background: rgba(218, 165, 32, 0.1);
+      color: var(--cream);
+    }
+
+    .verse-num.open .verse-num-option {
+      max-width: 4em;
+      opacity: 1;
+      padding: 8px 10px;
+      color: rgba(245, 242, 235, 0.5);
+    }
+
+    .verse-num.open .verse-num-option:hover {
+      background: rgba(218, 165, 32, 0.15);
+      color: var(--cream);
+    }
+
+    .verse-num.open .verse-num-option.current {
+      color: var(--gold);
+    }
+
+    /* ===== NAVIGATION AFFORDANCE ===== */
+    .scroll-hint {
+      position: fixed;
+      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: scrollHintFadeIn 1.5s ease 2s forwards;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .scroll-hint-text {
+      font-size: clamp(12px, 1.5vw, 16px);
+      color: rgba(245, 242, 235, 0.5);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+
+    .scroll-hint-chevron {
+      width: clamp(20px, 2.5vw, 28px);
+      height: clamp(20px, 2.5vw, 28px);
+      border-right: 2px solid rgba(218, 165, 32, 0.5);
+      border-bottom: 2px solid rgba(218, 165, 32, 0.5);
+      transform: rotate(45deg);
+      animation: chevronBounce 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scrollHintFadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes chevronBounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(4px); }
+    }
+
+    /* ===== TAP HINT ===== */
+    .tap-hint {
+      position: fixed;
+      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.5s ease;
+    }
+
+    .tap-hint-text {
+      font-size: clamp(12px, 1.5vw, 16px);
+      color: rgba(218, 165, 32, 0.6);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 300;
+      animation: tapHintPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes tapHintPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* ===== WORD TOOLTIP - Floating Glassmorphism ===== */
+    .word-tooltip {
+      position: fixed;
+      z-index: 200;
+      /* More translucent glassmorphism */
+      background: rgba(10, 8, 6, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(218, 165, 32, 0.2);
+      border-radius: clamp(12px, 1.5vw, 16px);
+      padding: clamp(16px, 2vw, 24px) clamp(20px, 2.5vw, 32px);
+      max-width: min(400px, 85vw);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 80px rgba(218, 165, 32, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px) scale(0.92);
+      transform-origin: top center;
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+      will-change: transform, opacity;
+    }
+
+    .word-tooltip.visible {
+      visibility: visible;
+      pointer-events: auto;
+      animation: tooltipSpringIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .word-tooltip.hiding {
+      animation: tooltipSpringOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .word-tooltip.above {
+      transform-origin: bottom center;
+    }
+
+    @keyframes tooltipSpringIn {
+      0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.02);
+      }
+      75% {
+        transform: translateY(1px) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOut {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.95);
+      }
+    }
+
+    /* Above tooltip animations (inverted direction) */
+    .word-tooltip.above.visible {
+      animation: tooltipSpringInAbove 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .word-tooltip.above.hiding {
+      animation: tooltipSpringOutAbove 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes tooltipSpringInAbove {
+      0% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 12px)) scale(0.92);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(calc(-100% - 3px)) scale(1.02);
+      }
+      75% {
+        transform: translateY(calc(-100% + 1px)) scale(0.995);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+    }
+
+    @keyframes tooltipSpringOutAbove {
+      0% {
+        opacity: 1;
+        transform: translateY(-100%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(calc(-100% + 8px)) scale(0.95);
+      }
+    }
+
+    /* Tooltip border shimmer effect */
+    .word-tooltip::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 13px;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba(218, 165, 32, 0.4) 0%,
+        rgba(218, 165, 32, 0.1) 40%,
+        rgba(218, 165, 32, 0.1) 60%,
+        rgba(218, 165, 32, 0.4) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      animation: borderShimmer 3s ease-in-out infinite;
+    }
+
+    .word-tooltip.visible::before {
+      opacity: 1;
+    }
+
+    @keyframes borderShimmer {
+      0%, 100% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+      }
+      50% {
+        background-position: 100% 100%;
+        opacity: 1;
+      }
+    }
+
+    .word-tooltip-hebrew {
+      font-size: clamp(22px, 4vw, 34px);
+      color: var(--gold);
+      direction: rtl;
+      text-align: center;
+      margin-bottom: clamp(6px, 1vw, 10px);
+      font-weight: 500;
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .word-tooltip.visible .word-tooltip-hebrew {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
+    }
+
+    .word-tooltip-transliteration {
+      font-size: clamp(14px, 2.5vw, 20px);
+      color: var(--cream);
+      text-align: center;
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      margin-bottom: clamp(10px, 1.5vw, 14px);
+      padding-bottom: clamp(10px, 1.5vw, 14px);
+      border-bottom: 1px solid rgba(218, 165, 32, 0);
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-transliteration {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s forwards,
+                 dividerFadeIn 0.5s ease 0.25s forwards;
+    }
+
+    .word-tooltip-tidbit {
+      font-size: clamp(13px, 2vw, 18px);
+      color: rgba(232, 228, 220, 0.85);
+      line-height: 1.6;
+      text-align: left;
+      font-weight: 300;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .word-tooltip.visible .word-tooltip-tidbit {
+      animation: tooltipContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+    }
+
+    @keyframes tooltipContentIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes dividerFadeIn {
+      0% {
+        border-bottom-color: rgba(218, 165, 32, 0);
+      }
+      100% {
+        border-bottom-color: rgba(218, 165, 32, 0.25);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="title-en" id="titleEn">Ecclesiastes</div>
+    
+    <div class="verse" id="verse1">
+      <div class="verse-he">
+        <span class="word-he" data-link="words">דִּבְרֵי</span>
+        <span class="placeholder" id="ph1">קֹהֶלֶת</span>
+        <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
+        <span class="word-he" data-link="king">מֶלֶךְ</span>
+        <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
+      </div>
+      <div class="verse-en" id="verse1En">The <span class="word-en" data-link="words">words</span> of the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="son">son of David</span>, <span class="word-en" data-link="king">king</span> in <span class="word-en" data-link="jerusalem">Jerusalem</span></div>
+    </div>
+    
+    <div class="verse" id="verse2">
+      <div class="verse-he">
+        <span class="word-he" data-link="vanity">הֲבֵל</span>
+        <span class="word-he" data-link="vanity">הֲבָלִים</span>
+        <span class="word-he" data-link="says">אָמַר</span>
+        <span class="placeholder" id="ph2">קֹהֶלֶת</span>
+        <span class="word-he" data-link="vanity">הֲבֵל</span>
+        <span class="word-he" data-link="vanity">הֲבָלִים</span>
+        <span class="word-he" data-link="all">הַכֹּל</span>
+        <span class="word-he" data-link="vanity">הָבֶל</span>
+      </div>
+      <div class="verse-en" id="verse2En"><span class="word-en" data-link="vanity">Vanity</span> of <span class="word-en" data-link="vanity">vanities</span>, <span class="word-en" data-link="says">says</span> the <span class="word-en" data-link="teacher">Teacher</span>, <span class="word-en" data-link="vanity">vanity</span> of <span class="word-en" data-link="vanity">vanities</span>! <span class="word-en" data-link="all">All</span> is <span class="word-en" data-link="vanity">vanity</span>.</div>
+    </div>
+
+    <div class="verse" id="verse3">
+      <div class="verse-he">
+        <span class="word-he" data-link="gain">מַה־יִּתְרוֹן</span>
+        <span class="word-he" data-link="man">לָאָדָם</span>
+        <span class="word-he" data-link="labor">בְּכָל־עֲמָלוֹ</span>
+        <span class="word-he" data-link="toils">שֶׁיַּעֲמֹל</span>
+        <span class="word-he" data-link="under">תַּחַת</span>
+        <span class="word-he" data-link="sun">הַשָּׁמֶשׁ</span>
+      </div>
+      <div class="verse-en" id="verse3En">What <span class="word-en" data-link="gain">gain</span> has <span class="word-en" data-link="man">man</span> from <span class="word-en" data-link="labor">all his toil</span> at which he <span class="word-en" data-link="toils">toils</span> <span class="word-en" data-link="under">under</span> the <span class="word-en" data-link="sun">sun</span>?</div>
+    </div>
+
+    <div class="verse" id="verse4">
+      <div class="verse-he">
+        <span class="word-he" data-link="generation">דּוֹר</span>
+        <span class="word-he" data-link="goes">הֹלֵךְ</span>
+        <span class="word-he" data-link="generation">וְדוֹר</span>
+        <span class="word-he" data-link="comes">בָּא</span>
+        <span class="word-he" data-link="earth">וְהָאָרֶץ</span>
+        <span class="word-he" data-link="forever">לְעוֹלָם</span>
+        <span class="word-he" data-link="remains">עֹמָדֶת</span>
+      </div>
+      <div class="verse-en" id="verse4En">A <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="goes">goes</span>, and a <span class="word-en" data-link="generation">generation</span> <span class="word-en" data-link="comes">comes</span>, but the <span class="word-en" data-link="earth">earth</span> <span class="word-en" data-link="remains">remains</span> <span class="word-en" data-link="forever">forever</span>.</div>
+    </div>
+  </div>
+  
+  <div class="title-he" id="qohelet" data-link="teacher">קֹהֶלֶת</div>
+  
+  <div class="progress" id="progress"></div>
+  <div class="verse-num" id="verseNum">
+    <!-- Verse options built dynamically -->
+  </div>
+
+  <div class="word-tooltip" id="wordTooltip">
+    <div class="word-tooltip-hebrew" id="tooltipHebrew"></div>
+    <div class="word-tooltip-transliteration" id="tooltipTransliteration"></div>
+    <div class="word-tooltip-tidbit" id="tooltipTidbit"></div>
+  </div>
+
+  <!-- Navigation affordances -->
+  <div class="scroll-hint" id="scrollHint">
+    <span class="scroll-hint-text">Swipe to explore</span>
+    <div class="scroll-hint-chevron"></div>
+  </div>
+
+  <div class="tap-hint" id="tapHint">
+    <span class="tap-hint-text">Tap the word to explore</span>
+  </div>
+
+
+  <script>
+    // ===== ELEMENTS =====
+    const $ = id => document.getElementById(id);
+    const titleEn = $('titleEn');
+    const qohelet = $('qohelet');
+    const ph1 = $('ph1');
+    const ph2 = $('ph2');
+    const progress = $('progress');
+    const verseNum = $('verseNum');
+
+    // ===== DYNAMIC VERSE DISCOVERY =====
+    // Automatically finds all verse elements in the DOM
+    const verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
+      el,
+      en: el.querySelector('.verse-en'),
+      words: [...el.querySelectorAll('.word-he')],
+      ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
+    }));
+    const VERSE_COUNT = verses.length;
+
+    const wordTooltip = $('wordTooltip');
+    const tooltipHebrew = $('tooltipHebrew');
+    const tooltipTransliteration = $('tooltipTransliteration');
+    const tooltipTidbit = $('tooltipTidbit');
+    const scrollHint = $('scrollHint');
+    const tapHint = $('tapHint');
+
+    // ===== WORD DATA =====
+    // Transliterations and contextual tidbits for each Hebrew word
+    const wordData = {
+      'words': {
+        hebrew: 'דִּבְרֵי',
+        transliteration: 'div·rei',
+        tidbit: 'The construct form of "devarim" (words/things). In Hebrew, words and things share the same root — speech has substance, creating reality.'
+      },
+      'teacher': {
+        hebrew: 'קֹהֶלֶת',
+        transliteration: 'qo·he·let',
+        tidbit: 'From "qahal" (assembly). One who gathers people to teach. Traditionally identified as Solomon in his old age, reflecting on life\'s meaning.'
+      },
+      'son': {
+        hebrew: 'בֶּן־דָּוִד',
+        transliteration: 'ben-da·vid',
+        tidbit: 'Son of David — a title claiming royal Davidic lineage. The hyphen (maqef) binds the words as one concept: a unified identity.'
+      },
+      'king': {
+        hebrew: 'מֶלֶךְ',
+        transliteration: 'me·lekh',
+        tidbit: 'King — from a root meaning "to counsel." The king wasn\'t merely a ruler but an advisor to the nation, responsible for wisdom and justice.'
+      },
+      'jerusalem': {
+        hebrew: 'בִּירוּשָׁלָֽםִ',
+        transliteration: 'bi·ru·sha·la·yim',
+        tidbit: 'In Jerusalem — literally "foundation of peace" (or "teaching of peace"). The city where heaven and earth meet, seat of wisdom and worship.'
+      },
+      'vanity': {
+        hebrew: 'הֶבֶל',
+        transliteration: 'he·vel',
+        tidbit: 'Often translated "vanity" but literally means breath, vapor, or mist. Something that appears and quickly vanishes — not worthless, but fleeting and ungraspable.'
+      },
+      'says': {
+        hebrew: 'אָמַר',
+        transliteration: 'a·mar',
+        tidbit: 'He said — the basic Hebrew word for speech. Its placement here gives Qohelet\'s words prophetic weight, like "thus says the LORD."'
+      },
+      'all': {
+        hebrew: 'הַכֹּל',
+        transliteration: 'ha·kol',
+        tidbit: 'The all, everything — with the definite article. Not just "everything" but THE everything: the totality of human experience under the sun.'
+      },
+      'gain': {
+        hebrew: 'מַה־יִּתְרוֹן',
+        transliteration: 'mah-yit·ron',
+        tidbit: 'What profit/advantage? "Yitron" appears only in Ecclesiastes — a commercial term asking what remains after all costs are counted.'
+      },
+      'man': {
+        hebrew: 'לָאָדָם',
+        transliteration: "la·a·dam",
+        tidbit: 'To/for the human — "adam" connects to "adamah" (earth/ground). Humanity is earthbound, made from dust and returning to it.'
+      },
+      'labor': {
+        hebrew: 'בְּכָל־עֲמָלוֹ',
+        transliteration: "be·khol-a·ma·lo",
+        tidbit: 'In all his toil — "amal" implies wearisome, exhausting labor. Not just work, but the grinding effort that wears down body and soul.'
+      },
+      'toils': {
+        hebrew: 'שֶׁיַּעֲמֹל',
+        transliteration: "she·ya·a·mol",
+        tidbit: 'That he toils — the same root as "amal" intensified. The repetition emphasizes life\'s endless cycle of effort upon effort.'
+      },
+      'under': {
+        hebrew: 'תַּחַת',
+        transliteration: 'ta·chat',
+        tidbit: 'Under/beneath — establishes a boundary. Everything "under the sun" is earthly, temporal. What lies above remains a mystery.'
+      },
+      'sun': {
+        hebrew: 'הַשָּׁמֶשׁ',
+        transliteration: 'ha·sha·mesh',
+        tidbit: 'The sun — "under the sun" appears 29 times in Ecclesiastes. It defines the book\'s scope: life as experienced in this visible world, under heaven\'s watchful eye.'
+      },
+      'generation': {
+        hebrew: 'דּוֹר',
+        transliteration: 'dor',
+        tidbit: 'Generation — from a root meaning "to circle" or "to dwell." Each generation inhabits its moment, then yields to the next in an endless cycle.'
+      },
+      'goes': {
+        hebrew: 'הֹלֵךְ',
+        transliteration: 'ho·lekh',
+        tidbit: 'Goes/walks away — the present participle of "halakh" (to walk). Life is movement toward departure; every generation is always already leaving.'
+      },
+      'comes': {
+        hebrew: 'בָּא',
+        transliteration: 'ba',
+        tidbit: 'Comes/arrives — the counterpart to "goes." While one generation departs, another enters. The stage is never empty, yet the actors always change.'
+      },
+      'earth': {
+        hebrew: 'וְהָאָרֶץ',
+        transliteration: 've·ha·a·retz',
+        tidbit: 'But the earth — "eretz" is the land, the ground, the world itself. Against human transience, it stands as silent witness to all comings and goings.'
+      },
+      'forever': {
+        hebrew: 'לְעוֹלָם',
+        transliteration: 'le·o·lam',
+        tidbit: 'Forever — "olam" means hidden time, eternity, or age. The earth endures into time beyond human reckoning, a permanence we can name but never know.'
+      },
+      'remains': {
+        hebrew: 'עֹמָדֶת',
+        transliteration: 'o·me·det',
+        tidbit: 'Stands/remains — from "amad" (to stand firm). While generations flow like water, the earth stands like a rock. The verb suggests quiet, steadfast presence.'
+      }
+    };
+
+    // ===== TOOLTIP =====
+    let tooltipVisible = false;
+    let activeWord = null;
+
+    let hideTooltipTimer = null;
+
+    function showTooltip(wordEl, linkValue) {
+      const data = wordData[linkValue];
+      if (!data) return;
+
+      // Cancel any pending hide animation
+      if (hideTooltipTimer) {
+        clearTimeout(hideTooltipTimer);
+        hideTooltipTimer = null;
+      }
+
+      activeWord = wordEl;
+      tooltipHebrew.textContent = data.hebrew;
+      tooltipTransliteration.textContent = data.transliteration;
+      tooltipTidbit.textContent = data.tidbit;
+
+      // Position the tooltip
+      const rect = wordEl.getBoundingClientRect();
+      const isHebrew = wordEl.classList.contains('word-he') || wordEl.classList.contains('title-he');
+
+      // Calculate horizontal position - centered on word
+      const tooltipWidth = Math.min(400, window.innerWidth * 0.85);
+      let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+
+      // Adjust if too close to edges
+      const padding = 12;
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > window.innerWidth - padding) {
+        left = window.innerWidth - tooltipWidth - padding;
+      }
+
+      // Position based on word type: above Hebrew (top of verse), below English (bottom of verse)
+      // Offset scales with viewport for consistent spacing at all sizes
+      const offset = Math.max(14, window.innerWidth * 0.015);
+      let top;
+      let isAbove;
+      if (isHebrew) {
+        // Hebrew words: tooltip above
+        top = rect.top - offset;
+        isAbove = true;
+      } else {
+        // English words: tooltip below
+        top = rect.bottom + offset;
+        isAbove = false;
+      }
+
+      // Safety fallback if tooltip would go off screen
+      if (isAbove && top < 150) {
+        top = rect.bottom + 14;
+        isAbove = false;
+      } else if (!isAbove && top + 150 > window.innerHeight) {
+        top = rect.top - 14;
+        isAbove = true;
+      }
+
+      // Remove animation classes before repositioning
+      wordTooltip.classList.remove('visible', 'hiding', 'above');
+
+      // Position first
+      wordTooltip.style.left = left + 'px';
+      wordTooltip.style.top = top + 'px';
+
+      // Add direction-aware class
+      if (isAbove) {
+        wordTooltip.classList.add('above');
+        wordTooltip.style.transform = 'translateY(-100%)';
+      } else {
+        wordTooltip.style.transform = '';
+      }
+
+      // Force reflow for animation restart
+      void wordTooltip.offsetHeight;
+
+      // Trigger spring-in animation
+      wordTooltip.classList.add('visible');
+      tooltipVisible = true;
+
+      // Hide tap hint when user interacts
+      hideTapHint();
+    }
+
+    function hideTooltip() {
+      if (!tooltipVisible) return;
+
+      // Add hiding animation
+      wordTooltip.classList.add('hiding');
+      wordTooltip.classList.remove('visible');
+
+      // Remove after animation completes
+      hideTooltipTimer = setTimeout(() => {
+        wordTooltip.classList.remove('hiding', 'above');
+        hideTooltipTimer = null;
+      }, 250);
+
+      tooltipVisible = false;
+      activeWord = null;
+    }
+
+    function toggleTooltip(wordEl, linkValue, e) {
+      // Prevent default to avoid text selection / copy-paste on mobile
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (tooltipVisible && activeWord === wordEl) {
+        hideTooltip();
+      } else {
+        showTooltip(wordEl, linkValue);
+      }
+    }
+
+    // Unified hit detection - finds word element at point with padding for touch
+    function findWordAtPoint(x, y, container) {
+      for (const word of container.querySelectorAll('[data-link]')) {
+        const r = word.getBoundingClientRect();
+        if (x >= r.left - 8 && x <= r.right + 8 && y >= r.top - 8 && y <= r.bottom + 8) {
+          return { el: word, link: word.dataset.link };
+        }
+      }
+      return null;
+    }
+
+    // ===== HIGHLIGHTING =====
+    let litElements = [];
+    let staggerTimers = [];
+
+    function clearLit() {
+      // Clear any pending stagger timers
+      staggerTimers.forEach(t => clearTimeout(t));
+      staggerTimers = [];
+
+      // Remove all lit classes
+      litElements.forEach(el => {
+        el.classList.remove('lit', 'lit-stagger');
+        el.style.animationDelay = '';
+      });
+      litElements = [];
+    }
+
+    function lightUp(linkValue, stagger = false) {
+      if (!linkValue) return;
+      clearLit();
+
+      const elements = [...document.querySelectorAll(`[data-link="${linkValue}"]`)];
+      litElements = elements;
+
+      if (stagger && elements.length > 1) {
+        // Staggered reveal animation for connected words
+        elements.forEach((el, i) => {
+          const timer = setTimeout(() => {
+            el.style.animationDelay = `0s`;
+            el.classList.add('lit-stagger');
+          }, i * 60); // 60ms stagger between each word
+          staggerTimers.push(timer);
+        });
+      } else {
+        // Immediate lighting for single words or hover
+        elements.forEach(el => el.classList.add('lit'));
+      }
+    }
+
+    // ===== TOUCH FEEDBACK =====
+    let touchFeedbackEl = null;
+
+    function addTouchFeedback(el) {
+      if (touchFeedbackEl) {
+        touchFeedbackEl.classList.remove('touch-active');
+      }
+      touchFeedbackEl = el;
+      el.classList.add('touch-active');
+    }
+
+    function removeTouchFeedback() {
+      if (touchFeedbackEl) {
+        touchFeedbackEl.classList.remove('touch-active');
+        touchFeedbackEl = null;
+      }
+    }
+
+    // Unified word interaction handler - reduces duplication across verses and qohelet
+    function handleWordInteraction(wordEl, linkValue, e, isTouch = false) {
+      if (isTouch) {
+        e.preventDefault();
+        addTouchFeedback(wordEl);
+      }
+      const wasVisible = tooltipVisible && activeWord === wordEl;
+      if (!wasVisible) {
+        lightUp(linkValue, true);
+      }
+      toggleTooltip(wordEl, linkValue, e);
+    }
+
+    function setupHitDetection() {
+      verses.forEach(({ el: c }) => {
+        // Desktop hover highlighting
+        c.addEventListener('mousemove', e => {
+          if (tooltipVisible) return; // Don't change highlights while tooltip is shown
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) lightUp(result.link, false); // No stagger for hover
+        });
+        c.addEventListener('mouseleave', () => {
+          if (!tooltipVisible) clearLit();
+        });
+
+        // Desktop click for tooltip
+        c.addEventListener('click', e => {
+          const result = findWordAtPoint(e.clientX, e.clientY, c);
+          if (result) handleWordInteraction(result.el, result.link, e);
+        });
+
+        // Mobile touch handling - defer tap until touchend to distinguish from swipe
+        c.addEventListener('touchstart', e => {
+          const t = e.touches[0];
+          const result = findWordAtPoint(t.clientX, t.clientY, c);
+          if (result) {
+            e.preventDefault();
+            touch.pendingTap = { el: result.el, link: result.link };
+            addTouchFeedback(result.el);
+          }
+        }, { passive: false });
+      });
+
+      // Qohelet (floating title) handling - uses same interaction pattern as verses
+      qohelet.addEventListener('mouseenter', () => {
+        if (!tooltipVisible) lightUp('teacher', false);
+      });
+      qohelet.addEventListener('mouseleave', () => {
+        if (!tooltipVisible) clearLit();
+      });
+      qohelet.addEventListener('click', e => handleWordInteraction(qohelet, 'teacher', e));
+      qohelet.addEventListener('touchstart', e => {
+        e.preventDefault();
+        touch.pendingTap = { el: qohelet, link: 'teacher' };
+        addTouchFeedback(qohelet);
+      }, { passive: false });
+
+      // Hide tooltip and clear highlights when tapping outside
+      document.addEventListener('touchstart', e => {
+        if (tooltipVisible && !wordTooltip.contains(e.target) && !e.target.closest('[data-link]')) {
+          hideTooltip();
+          clearLit();
+        }
+      }, { passive: true });
+
+      // Desktop: click outside hides tooltip
+      document.addEventListener('click', e => {
+        if (tooltipVisible && !wordTooltip.contains(e.target) && !e.target.closest('[data-link]')) {
+          hideTooltip();
+          clearLit();
+        }
+      });
+
+      // Clear highlights on touchend (but keep tooltip if visible)
+      document.addEventListener('touchend', () => {
+        if (!tooltipVisible) {
+          setTimeout(clearLit, 150);
+        }
+      }, { passive: true });
+    }
+
+    // ===== EASING =====
+    function ease(t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return (1 - Math.cos(t * Math.PI)) / 2;
+    }
+
+    // ===== SPRING =====
+    class Spring {
+      constructor(v = 0) {
+        this.value = v;
+        this.target = v;
+        this.velocity = 0;
+        this.baseTension = 30;
+        this.baseFriction = 9;
+        this.intensity = 0;
+        this.lastInput = 0;
+      }
+      
+      nudge(d) {
+        this.target = Math.max(0, Math.min(MAX, this.target + d));
+        this.intensity = Math.min(1, this.intensity + 0.25);
+        this.lastInput = Date.now();
+      }
+      
+      set(t) {
+        this.target = Math.max(0, Math.min(MAX, t));
+        this.intensity = Math.min(1, this.intensity + 0.15);
+        this.lastInput = Date.now();
+      }
+      
+      update(dt = 1/60) {
+        // Decay intensity
+        if (Date.now() - this.lastInput > 80) {
+          this.intensity *= 0.92;
+        }
+        
+        // Responsive physics
+        const tension = this.baseTension + this.intensity * 60;
+        const friction = this.baseFriction + this.intensity * 5;
+        
+        const d = this.target - this.value;
+        this.velocity += (d * tension - this.velocity * friction) * dt;
+        this.value += this.velocity * dt;
+        
+        // Clamp to valid range and kill velocity at boundaries
+        if (this.value <= 0) {
+          this.value = 0;
+          if (this.velocity < 0) this.velocity = 0;
+        }
+        if (this.value >= MAX) {
+          this.value = MAX;
+          if (this.velocity > 0) this.velocity = 0;
+        }
+        
+        // Snap to target when close enough (decisive settling)
+        if (Math.abs(d) < 0.015 && Math.abs(this.velocity) < 0.01) {
+          this.value = this.target;
+          this.velocity = 0;
+        }
+        
+        return this.value;
+      }
+      
+      snap(v) {
+        this.value = Math.max(0, Math.min(MAX, v));
+        this.target = this.value;
+        this.velocity = 0;
+        this.intensity = 0;
+      }
+    }
+
+    // ===== VERSE SELECTOR =====
+    let selectorOpen = false;
+
+    function buildVerseSelector() {
+      verseNum.innerHTML = '';
+      verses.forEach((verse, i) => {
+        const option = document.createElement('span');
+        option.className = 'verse-num-option';
+        option.textContent = verse.ref;
+        option.dataset.index = i;
+        option.addEventListener('click', e => {
+          e.stopPropagation();
+          if (selectorOpen) {
+            navigateToVerse(i);
+            closeSelector();
+          } else {
+            openSelector();
+          }
+        });
+        verseNum.appendChild(option);
+      });
+    }
+
+    function openSelector() {
+      if (selectorOpen) return;
+      selectorOpen = true;
+      verseNum.classList.add('open');
+    }
+
+    function closeSelector() {
+      if (!selectorOpen) return;
+      selectorOpen = false;
+      verseNum.classList.remove('open');
+    }
+
+    function toggleSelector() {
+      if (selectorOpen) closeSelector();
+      else openSelector();
+    }
+
+    function updateSelectorHighlight() {
+      const currentVerse = Math.max(0, Math.round(timeline.value) - INTRO_ANCHORS);
+      const options = verseNum.querySelectorAll('.verse-num-option');
+      options.forEach((opt, i) => {
+        opt.classList.toggle('current', i === currentVerse && timeline.value >= INTRO_ANCHORS);
+      });
+    }
+
+    function navigateToVerse(verseIndex) {
+      const targetAnchor = INTRO_ANCHORS + verseIndex;
+      timeline.set(targetAnchor);
+    }
+
+    // ===== STATE =====
+    // Anchors are sequential integers: 0=title, 1=title+qohelet, 2=qohelet alone, 3+=verses
+    const INTRO_ANCHORS = 3;  // Number of intro states before verses begin
+    const MAX = INTRO_ANCHORS + VERSE_COUNT - 1;  // Auto-computed from verse count
+    const SNAP_THRESHOLD = 0.02; // If within this of anchor, use exact state
+    
+    const timeline = new Spring(0);
+    let pos = {};
+    let startTime = Date.now();
+    
+    function measure() {
+      // Reset for measurement
+      titleEn.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
+      qohelet.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);opacity:1';
+
+      // Reset all verses dynamically
+      verses.forEach(verse => {
+        verse.el.style.cssText = 'position:absolute;opacity:1;transform:none';
+        verse.words.forEach(w => { w.style.opacity = '1'; w.style.transform = 'none'; });
+      });
+
+      void document.body.offsetHeight;
+      
+      const scene = document.querySelector('.scene').getBoundingClientRect();
+      const ph1R = ph1.getBoundingClientRect();
+      const ph2R = ph2.getBoundingClientRect();
+      
+      pos = {
+        cx: scene.left + scene.width / 2,
+        cy: scene.top + scene.height / 2,
+        slot1: { x: ph1R.left + ph1R.width / 2, y: ph1R.top + ph1R.height / 2 },
+        slot2: { x: ph2R.left + ph2R.width / 2, y: ph2R.top + ph2R.height / 2 },
+        scale: parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize)
+      };
+    }
+
+    // ===== EXACT ANCHOR STATES =====
+    // These are the guaranteed "resting" states - no interpolation
+
+    // Helper: generate verse visibility states for a given active verse index (-1 = none active)
+    function generateVerseStates(activeVerseIndex) {
+      const v = {};  // verse container states
+      const vWords = {};  // word visibility (0-1)
+      const vEn = {};  // english visibility (0-1)
+
+      verses.forEach((_, i) => {
+        const isActive = i === activeVerseIndex;
+        const isPast = i < activeVerseIndex;
+
+        v[i] = {
+          opacity: isActive ? 1 : 0,
+          y: isPast ? -15 : (isActive ? 0 : 25)
+        };
+        vWords[i] = isActive ? 1 : 0;
+        vEn[i] = isActive ? 1 : 0;
+      });
+
+      return { v, vWords, vEn };
+    }
+
+    function getAnchorState(anchor) {
+      // Generate verse states (none active for intro anchors)
+      const activeVerse = anchor >= INTRO_ANCHORS ? anchor - INTRO_ANCHORS : -1;
+      const { v, vWords, vEn } = generateVerseStates(activeVerse);
+
+      // Base state with verse data
+      const state = { v, vWords, vEn, verseNum: '' };
+
+      // Intro states (0, 1, 2) - unique configurations
+      if (anchor === 0) {
+        // Title only
+        state.en = { x: pos.cx, y: pos.cy, opacity: 1 };
+        state.q = { x: pos.cx, y: pos.cy + 70, scale: 1, opacity: 0 };
+      } else if (anchor === 1) {
+        // Title + Qohelet appearing
+        state.en = { x: pos.cx, y: pos.cy - 50, opacity: 1 };
+        state.q = { x: pos.cx, y: pos.cy + 40, scale: 1, opacity: 1 };
+      } else if (anchor === 2) {
+        // Qohelet alone, centered
+        state.en = { x: pos.cx, y: pos.cy - 75, opacity: 0 };
+        state.q = { x: pos.cx, y: pos.cy, scale: 1, opacity: 1 };
+      } else {
+        // Verse states (anchor >= 3)
+        state.en = { x: pos.cx, y: pos.cy - 75, opacity: 0 };
+
+        // Qohelet positioning based on which verse is active
+        if (activeVerse === 0) {
+          // Verse 1: Qohelet floats into slot 1 (placeholder in verse 1)
+          state.q = { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 };
+        } else if (activeVerse === 1) {
+          // Verse 2: Qohelet floats into slot 2 (placeholder in verse 2)
+          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 };
+        } else {
+          // Verse 3+: Qohelet fades out (stays at last position)
+          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 };
+        }
+
+        // Set verse reference
+        state.verseNum = verses[activeVerse].ref;
+      }
+
+      return state;
+    }
+    
+    // ===== INTERPOLATED STATES =====
+    // Only used when between anchors
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function lerpState(s1, s2, t) {
+      const e = ease(t);
+
+      // Interpolate verse states dynamically
+      const v = {};
+      const vWords = {};
+      const vEn = {};
+
+      verses.forEach((_, i) => {
+        v[i] = {
+          opacity: lerp(s1.v[i].opacity, s2.v[i].opacity, e),
+          y: lerp(s1.v[i].y, s2.v[i].y, e)
+        };
+        vWords[i] = lerp(s1.vWords[i], s2.vWords[i], e);
+        vEn[i] = lerp(s1.vEn[i], s2.vEn[i], e);
+      });
+
+      return {
+        en: {
+          x: lerp(s1.en.x, s2.en.x, e),
+          y: lerp(s1.en.y, s2.en.y, e),
+          opacity: lerp(s1.en.opacity, s2.en.opacity, e)
+        },
+        q: {
+          x: lerp(s1.q.x, s2.q.x, e),
+          y: lerp(s1.q.y, s2.q.y, e),
+          scale: lerp(s1.q.scale, s2.q.scale, e),
+          opacity: lerp(s1.q.opacity, s2.q.opacity, e)
+        },
+        v,
+        vWords,
+        vEn,
+        verseNum: e > 0.5 ? s2.verseNum : s1.verseNum
+      };
+    }
+    
+    function getState(p) {
+      // Clamp to valid range
+      p = Math.max(0, Math.min(MAX, p));
+
+      // Check if at anchor (use exact state) - anchors are integers, so check proximity
+      const nearestAnchor = Math.round(p);
+      if (Math.abs(p - nearestAnchor) < SNAP_THRESHOLD) {
+        return getAnchorState(nearestAnchor);
+      }
+
+      // Interpolate between floor and ceiling anchors
+      const lower = Math.floor(p);
+      const upper = Math.ceil(p);
+      const t = p - lower;
+      return lerpState(getAnchorState(lower), getAnchorState(upper), t);
+    }
+
+    // ===== RENDER =====
+    function render() {
+      const p = timeline.update();
+      const state = getState(p);
+      const time = Date.now() - startTime;
+
+      // Subtle ambient motion only at true rest
+      const atRest = Math.abs(timeline.velocity) < 0.01;
+      const ambY = atRest ? Math.sin(time * 0.0006) * 2 : 0;
+      const ambS = atRest ? 1 + Math.sin(time * 0.0008) * 0.002 : 1;
+
+      // English title
+      titleEn.style.left = state.en.x + 'px';
+      titleEn.style.top = (state.en.y + (state.en.opacity > 0.5 ? ambY * 0.5 : 0)) + 'px';
+      titleEn.style.transform = 'translate(-50%, -50%)';
+      titleEn.style.opacity = state.en.opacity;
+
+      // Qohelet
+      const qAmbY = (p >= 1.8 && p <= 2.2 && atRest) ? ambY : 0;
+      const qAmbS = (p >= 1.8 && p <= 2.2 && atRest) ? ambS : 1;
+      qohelet.style.left = state.q.x + 'px';
+      qohelet.style.top = (state.q.y + qAmbY) + 'px';
+      qohelet.style.transform = `translate(-50%, -50%) scale(${state.q.scale * qAmbS})`;
+      qohelet.style.opacity = state.q.opacity;
+      qohelet.style.pointerEvents = state.q.opacity > 0.5 ? 'auto' : 'none';
+
+      // Render all verses
+      verses.forEach((verse, i) => {
+        const vState = state.v[i];
+
+        // Verse container
+        verse.el.style.opacity = vState.opacity;
+        verse.el.style.transform = `translateY(${vState.y}px)`;
+        verse.el.style.pointerEvents = vState.opacity > 0.2 ? 'auto' : 'none';
+
+        // Hebrew words - staggered reveal
+        const wordProgress = state.vWords[i] * (verse.words.length + 1);
+        verse.words.forEach((w, wi) => {
+          const wordT = Math.max(0, Math.min(1, wordProgress - wi));
+          w.style.opacity = wordT;
+          w.style.transform = wordT < 1 ? `translateY(${(1 - wordT) * 10}px)` : 'none';
+        });
+
+        // English translation
+        verse.en.style.opacity = state.vEn[i];
+      });
+
+      // Progress
+      progress.style.width = (p / MAX * 100) + '%';
+
+      // Verse selector - update current highlight and visibility
+      verseNum.style.opacity = state.verseNum ? 1 : 0;
+      updateSelectorHighlight();
+
+      // Update navigation hints
+      updateHints(p);
+
+      requestAnimationFrame(render);
+    }
+
+    // ===== NAVIGATION UI =====
+    let scrollHintHidden = false;
+    let tapHintVisible = false;
+    let tapHintHidden = false;
+
+    function hideScrollHint() {
+      if (!scrollHintHidden) {
+        scrollHintHidden = true;
+        scrollHint.style.transition = 'opacity 0.5s ease';
+        scrollHint.style.opacity = '0';
+        setTimeout(() => {
+          scrollHint.style.display = 'none';
+        }, 500);
+      }
+    }
+
+    function showTapHint() {
+      if (!tapHintVisible && !tapHintHidden && tapHint) {
+        tapHintVisible = true;
+        tapHint.style.opacity = '1';
+      }
+    }
+
+    function hideTapHint() {
+      if (tapHintVisible && tapHint) {
+        tapHintHidden = true;
+        tapHint.style.transition = 'opacity 0.5s ease';
+        tapHint.style.opacity = '0';
+        setTimeout(() => {
+          tapHint.style.display = 'none';
+        }, 500);
+      }
+    }
+
+    function updateHints(p) {
+      // Hide scroll hint when user starts scrolling
+      if (p > 0.3) {
+        hideScrollHint();
+      }
+
+      // Show tap hint when on Qohelet-only screen (anchor 2)
+      if (p > 1.8 && p < 2.2 && !tapHintHidden) {
+        showTapHint();
+      } else if (p < 1.5 || p > 2.5) {
+        if (tapHintVisible) hideTapHint();
+      }
+    }
+    
+    // ===== INPUT =====
+    // Navigation uses simple arithmetic since anchors are sequential integers 0..MAX
+    function snap() {
+      timeline.set(Math.round(timeline.target));
+    }
+
+    function next() {
+      const nextAnchor = Math.floor(timeline.target + 0.95);
+      if (nextAnchor <= MAX) timeline.set(nextAnchor);
+    }
+
+    function prev() {
+      const prevAnchor = Math.ceil(timeline.target - 0.95);
+      if (prevAnchor >= 0) timeline.set(prevAnchor);
+    }
+    
+    let keyHeld = false, keyTimer = null;
+    
+    document.addEventListener('keydown', e => {
+      // Escape closes selector
+      if (e.key === 'Escape' && selectorOpen) {
+        e.preventDefault();
+        closeSelector();
+        return;
+      }
+
+      if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (!keyHeld) {
+          next();
+          keyHeld = true;
+          keyTimer = setInterval(() => timeline.nudge(0.06), 50);
+        }
+      } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        e.preventDefault();
+        if (!keyHeld) {
+          prev();
+          keyHeld = true;
+          keyTimer = setInterval(() => timeline.nudge(-0.06), 50);
+        }
+      }
+    });
+    
+    document.addEventListener('keyup', e => {
+      if (['ArrowDown', 'ArrowRight', ' ', 'ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        keyHeld = false;
+        clearInterval(keyTimer);
+        snap();
+      }
+    });
+    
+    let touch = { y: 0, scrolling: false, pendingTap: null };
+
+    document.addEventListener('touchstart', e => {
+      touch.y = e.touches[0].clientY;
+      touch.scrolling = false;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      const dy = e.touches[0].clientY - touch.y;
+      if (Math.abs(dy) > 8) {
+        touch.scrolling = true;
+        // Cancel pending tap - this is a swipe, not a tap
+        if (touch.pendingTap) {
+          removeTouchFeedback();
+          touch.pendingTap = null;
+        }
+        // Hide tooltip on scroll
+        if (tooltipVisible) {
+          hideTooltip();
+          clearLit();
+        }
+        // Close selector on scroll
+        if (selectorOpen) closeSelector();
+      }
+      if (touch.scrolling) {
+        timeline.nudge(-dy / 280);
+        touch.y = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      // Complete pending tap if it wasn't cancelled by swipe
+      if (touch.pendingTap && !touch.scrolling) {
+        const { el, link } = touch.pendingTap;
+        const wasVisible = tooltipVisible && activeWord === el;
+        if (!wasVisible) {
+          lightUp(link, true);
+        }
+        toggleTooltip(el, link);
+      }
+      touch.pendingTap = null;
+      removeTouchFeedback();
+
+      if (touch.scrolling) snap();
+    });
+    
+    let wheelTimer;
+    document.addEventListener('wheel', e => {
+      e.preventDefault();
+      // Hide tooltip on scroll
+      if (tooltipVisible) {
+        hideTooltip();
+        clearLit();
+      }
+      // Close selector on scroll
+      if (selectorOpen) closeSelector();
+      timeline.nudge(e.deltaY / 320);
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(snap, 100);
+    }, { passive: false });
+    
+    // ===== INIT =====
+    function init() {
+      measure();
+      setupHitDetection();
+      buildVerseSelector();
+      startTime = Date.now();
+
+      timeline.snap(0);
+
+      // Apply initial state
+      const s = getAnchorState(0);
+      titleEn.style.opacity = s.en.opacity;
+      qohelet.style.opacity = s.q.opacity;
+
+      // Apply initial state to all verses
+      verses.forEach((verse, i) => {
+        verse.el.style.opacity = s.v[i].opacity;
+      });
+
+      // Close selector when clicking outside
+      document.addEventListener('click', e => {
+        if (selectorOpen && !e.target.closest('.verse-num')) {
+          closeSelector();
+        }
+      });
+
+      requestAnimationFrame(render);
+    }
+    
+    document.fonts.ready.then(init);
+    window.addEventListener('resize', () => setTimeout(measure, 100));
+  </script>
+</body>
+</html>
