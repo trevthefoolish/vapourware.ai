@@ -589,7 +589,7 @@
     <div class="verse" id="verse1">
       <div class="verse-he">
         <span class="word-he" data-link="words">דִּבְרֵי</span>
-        <span class="placeholder" id="ph1">קֹהֶלֶת</span>
+        <span class="placeholder">קֹהֶלֶת</span>
         <span class="word-he" data-link="son">בֶּן־דָּוִד</span>
         <span class="word-he" data-link="king">מֶלֶךְ</span>
         <span class="word-he" data-link="jerusalem">בִּירוּשָׁלָֽםִ</span>
@@ -602,7 +602,7 @@
         <span class="word-he" data-link="vanity">הֲבֵל</span>
         <span class="word-he" data-link="vanity">הֲבָלִים</span>
         <span class="word-he" data-link="says">אָמַר</span>
-        <span class="placeholder" id="ph2">קֹהֶלֶת</span>
+        <span class="placeholder">קֹהֶלֶת</span>
         <span class="word-he" data-link="vanity">הֲבֵל</span>
         <span class="word-he" data-link="vanity">הֲבָלִים</span>
         <span class="word-he" data-link="all">הַכֹּל</span>
@@ -680,18 +680,19 @@
     const $ = id => document.getElementById(id);
     const titleEn = $('titleEn');
     const qohelet = $('qohelet');
-    const ph1 = $('ph1');
-    const ph2 = $('ph2');
     const progress = $('progress');
     const verseNum = $('verseNum');
 
     // ===== DYNAMIC VERSE DISCOVERY =====
     // Automatically finds all verse elements in the DOM
+    // Placeholders mark where the floating Qohelet title should animate to
     const verses = [...document.querySelectorAll('.verse')].map((el, i) => ({
       el,
       en: el.querySelector('.verse-en'),
       words: [...el.querySelectorAll('.word-he')],
-      ref: `1:${i + 1}`  // Verse reference (e.g., "1:1", "1:2")
+      placeholder: el.querySelector('.placeholder'),
+      slot: null,  // Position computed in measure()
+      ref: `1:${i + 1}`
     }));
     const VERSE_COUNT = verses.length;
 
@@ -1245,17 +1246,29 @@
       });
 
       void document.body.offsetHeight;
-      
+
       const scene = document.querySelector('.scene').getBoundingClientRect();
-      const ph1R = ph1.getBoundingClientRect();
-      const ph2R = ph2.getBoundingClientRect();
-      
+
+      // Compute slot positions for each verse with a placeholder
+      let scale = 1;
+      verses.forEach(verse => {
+        if (verse.placeholder) {
+          const rect = verse.placeholder.getBoundingClientRect();
+          verse.slot = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+          // Use first placeholder's font size for scale calculation
+          if (scale === 1) {
+            scale = parseFloat(getComputedStyle(verse.placeholder).fontSize) /
+                    parseFloat(getComputedStyle(qohelet).fontSize);
+          }
+        } else {
+          verse.slot = null;
+        }
+      });
+
       pos = {
         cx: scene.left + scene.width / 2,
         cy: scene.top + scene.height / 2,
-        slot1: { x: ph1R.left + ph1R.width / 2, y: ph1R.top + ph1R.height / 2 },
-        slot2: { x: ph2R.left + ph2R.width / 2, y: ph2R.top + ph2R.height / 2 },
-        scale: parseFloat(getComputedStyle(ph1).fontSize) / parseFloat(getComputedStyle(qohelet).fontSize)
+        scale
       };
     }
 
@@ -1308,20 +1321,20 @@
         // Verse states (anchor >= 3)
         state.en = { x: pos.cx, y: pos.cy - 75, opacity: 0 };
 
-        // Qohelet positioning based on which verse is active
-        if (activeVerse === 0) {
-          // Verse 1: Qohelet floats into slot 1 (placeholder in verse 1)
-          state.q = { x: pos.slot1.x, y: pos.slot1.y, scale: pos.scale, opacity: 1 };
-        } else if (activeVerse === 1) {
-          // Verse 2: Qohelet floats into slot 2 (placeholder in verse 2)
-          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 1 };
+        // Qohelet positioning: animate to placeholder if present, otherwise fade out
+        const currentVerse = verses[activeVerse];
+        if (currentVerse.slot) {
+          // This verse has a placeholder - Qohelet animates there
+          state.q = { x: currentVerse.slot.x, y: currentVerse.slot.y, scale: pos.scale, opacity: 1 };
         } else {
-          // Verse 3+: Qohelet fades out (stays at last position)
-          state.q = { x: pos.slot2.x, y: pos.slot2.y, scale: pos.scale, opacity: 0 };
+          // No placeholder - find last verse with a slot and fade out there
+          const lastSlotVerse = verses.slice(0, activeVerse).reverse().find(v => v.slot);
+          const fallbackSlot = lastSlotVerse ? lastSlotVerse.slot : { x: pos.cx, y: pos.cy };
+          state.q = { x: fallbackSlot.x, y: fallbackSlot.y, scale: pos.scale, opacity: 0 };
         }
 
         // Set verse reference
-        state.verseNum = verses[activeVerse].ref;
+        state.verseNum = currentVerse.ref;
       }
 
       return state;
